@@ -10,6 +10,7 @@
 
 // pin 4 will be the lowest binary digit and pin 7 the highest
 
+//Hi Quentin
 
 //////////  Software  /////////////////////////////////////////
 
