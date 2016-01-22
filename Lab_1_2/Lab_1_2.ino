@@ -34,21 +34,18 @@ int debounce_time = 50;
 void setup() {
   // set pin modes for all input and output pins
   // inputs with pullup resistor to pull them high when disconnected from ground
-  Serial.begin(9600);
-  pinMode(INPUT, input_pin_1);
-  pinMode(INPUT, input_pin_2);
-  digitalWrite(input_pin_1, HIGH);
-  digitalWrite(input_pin_2, HIGH);
+  pinMode(input_pin_1, INPUT_PULLUP);
+  pinMode(input_pin_2, INPUT_PULLUP);
 
   //attach an interrupt to both pins that runs when they are low
   attachInterrupt(digitalPinToInterrupt(input_pin_1), count, LOW);
   attachInterrupt(digitalPinToInterrupt(input_pin_2), rverse, LOW);
 
   // outputs
-  pinMode(OUTPUT, LED_pin_1);
-  pinMode(OUTPUT, LED_pin_2);
-  pinMode(OUTPUT, LED_pin_3);
-  pinMode(OUTPUT, LED_pin_4);
+  pinMode(LED_pin_1, OUTPUT);
+  pinMode(LED_pin_2, OUTPUT);
+  pinMode(LED_pin_3, OUTPUT);
+  pinMode(LED_pin_4, OUTPUT);
 }
 
 void loop() {
@@ -70,21 +67,18 @@ void count() {
     else if (button_count == 255) {
       button_count = 15;
     }
-    Serial.println("countLoop");
+    last_count_time = millis(); // reset the debounce timer
   }
-  last_count_time = millis();
-  while (!digitalRead(input_pin_1)) {}
-
 }
 
 
 // the reverse ISR is run when pin 3 is low
 void rverse() {
+  // only run this code if it has been longer than the debounce time
   if (millis() - last_reverse_time > debounce_time) {
     // increment the button_count variable, and control the overflow with an if statement
     count_direction *= -1;
+    last_reverse_time = millis(); // reset the debounce timer
   }
-  last_reverse_time = millis();
-  while (!digitalRead(input_pin_2)) {}
 }
 

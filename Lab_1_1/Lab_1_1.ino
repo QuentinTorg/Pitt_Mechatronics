@@ -1,11 +1,11 @@
+
+
 //////////   Hardware setup  /////////////////////////////////
 
 // pin2 --> NO switch --> ground
 // pin3 --> NO switch --> ground
 // pin4 --> 330ohm --> LED long leg --> LED short leg --> ground
 // pin5 --> 330ohm --> LED long leg --> LED short leg --> ground
-
-
 
 
 //////////  Software  /////////////////////////////////////////
@@ -20,14 +20,12 @@ void setup() {
   // set pin modes for all input and output pins
 
   // inputs with pullup resistor to pull them high when disconnected from ground
-  pinMode(INPUT, input_pin_1);
-  pinMode(INPUT, input_pin_2);
-  digitalWrite(input_pin_1, HIGH);
-  digitalWrite(input_pin_2, HIGH);
+  pinMode(input_pin_1, INPUT_PULLUP);
+  pinMode(input_pin_2, INPUT_PULLUP);
   
   // outputs
-  pinMode(OUTPUT, LED_pin_1);
-  pinMode(OUTPUT, LED_pin_2);
+  pinMode(LED_pin_1, OUTPUT);
+  pinMode(LED_pin_2, OUTPUT);
 }
 
 void loop() {
