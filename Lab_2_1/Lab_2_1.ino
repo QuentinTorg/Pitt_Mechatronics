@@ -22,8 +22,8 @@ byte LED_pin_5 = 6;
 byte sense_pin = A0;
 
 // set sensor and timing variables here
-int min_delay = 1;
-int max_delay = 500;
+int min_delay = 100;
+int max_delay = 1000;
 
 // test what the possible min and max sensor readings could be and insert
 int min_sensor_value = 0;
@@ -37,10 +37,10 @@ int delay_time;
 
 void setup() {
 
-  // uncomment the Serial.print lines to print sensor readings.  
+  // uncomment the Serial.print lines to print sensor readings.
   // Leaving them running will slow the code when running the chaser though
   //Serial.begin(9600);
-  
+
   // outputs
   pinMode(LED_pin_1, OUTPUT);
   pinMode(LED_pin_2, OUTPUT);
@@ -60,13 +60,13 @@ void loop() {
   // scale the sensor reading to the min and max delay times using the map() function
   delay_time = map(analogRead(sense_pin), min_sensor_value, max_sensor_value, min_delay, max_delay);
 
-  // uncomment the Serial.print lines to print sensor readings.  
+  // uncomment the Serial.print lines to print sensor readings.
   // Leaving them running will slow the code when running the chaser though
   //Serial.print("sensor reading = ");
   //Serial.println(analogRead(sense_pin));
 
   digitalWrite(LED_pin_1 + chase_LED_state, LOW);
-  
+
   chase_LED_state += chase_direction;
   if (chase_LED_state == -1 || chase_LED_state == 5) {
     chase_LED_state -= chase_direction * 2;
@@ -74,6 +74,10 @@ void loop() {
   }
 
   digitalWrite(LED_pin_1 + chase_LED_state, HIGH);
-  
+
   delay(delay_time);
+
+  while (analogRead(sense_pin) == max_sensor_value) {
+    digitalWrite(LED_pin_1 + chase_LED_state, LOW);
+  }
 }
