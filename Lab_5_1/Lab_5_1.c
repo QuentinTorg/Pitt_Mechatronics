@@ -1,97 +1,131 @@
 /*
-* MechatronicsLab5.c
+* GccApplication1.c
 *
-* Created: 3/24/2016 12:16:40 PM
-* Author : James Braza
+* Created: 3/25/2016 2:23:59 PM
+* Author : James, Henry, and Quentin
 */
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-uint8_t count = 0; //unsigned 8 bit integer called count
-uint8_t interruptFlag = 0;
-
-void delayNms_timer0();
+//** Functions **//
 void wait(int msec);
-
-int main(void)
-{	// Setup
-	//input = 0, output = 1
-	
-	DDRC = 0x0F;  //LED's: set bits PC7-PC0 as output (all output)
-	DDRD = 0x00; //Buttons: set bits PD7-PD0 as input (all input)
-	
-	//PORTD = 1<<PD2 | 1<<PD3; //enables pull-up resistors
-
-	EICRA = 1<<ISC01 | 0<<ISC00 | 1<<ISC11 | 0<<ISC10;// Trigger INT0 on rising edge; Trigger INT1 on rising edge
-	EIMSK = 1<<INT1 | 1<<INT0;// Enable INT1 and INT0
-	sei(); //Enable Global Interrupt
-
-	while (1) {
-		//temp = PIND; // "Read" the contents of PortD (the pins set as inputs)
-		//PORTB = temp; // "Write" the contents of R16 to PortB (Note that pins PB3, PB4, and PB5 are also used for in-circuit programming
-		//so they may not work properly if the programmer is still connected.)
-		
-		//0 means LED's turn on - active low
-		
-		if (interruptFlag)
-		{
-			wait(500);
-			count++;
-			interruptFlag = 0;
-		}
-
-		PORTC = ~count;
-		wait(250);
-
-		count++;
-		if (count == 0)
-		{count = 15;}
-	}
-
-	return(0);
-}
-
-void wait(int msec) {// function passes number of msec to delay
-	while (msec > 0) {
-		delayNms_timer0();
-		msec = msec - 1;
-	}
-}
-
-void delayNms_timer0() {
-	TCCR0A = 0x00; // clears WGM00 and WGM01 (bits 0 and 1) to ensure Timer/Counter is in normal mode.
-	TCNT0 = 5; // load timer0 with number for delay (count must reach 255-5)
-	//TCCR0B = 0x01; // Start Timer0, Normal mode, crystal clock, no prescaler
-	TCCR0B = 0x02; // Start Timer0, Normal mode, crystal clock, prescaler = 8
-	//TCCR0B = 0x03; // Start Timer0, Normal mode, crystal clock, prescaler = 64
-	//TCCR0B = 0x04; // Start Timer0, Normal mode, crystal clock, prescaler = 256
-	//TCCR0B = 0x05; // Start Timer0, Normal mode, crystal clock, prescaler = 1024
-	while ((TIFR0 & (0x1<<TOV0)) == 0); // wait for TOV0 to roll over:
-	// For an explanation of this statement, see the notes below.
-	TCCR0B = 0x00; // Stop Timer0
-	TIFR0 = 0x1<<TOV0; // Clear TOV0 (note that this is an odd bit in that it is cleared by writing a 1 to it)
-}
+void delayNms_timer0();
+uint8_t count = 1;
 
 //Interrupt Service Routine for INT0
 ISR(INT0_vect)
 {
-	/*unsigned int timer=0;
-	PORTC=0x00;
-	while (timer < 1000000)
+	//TCCR0B = 0x00; // Stop TIMER0
+	long time = 0;
+	
+	//EIMSK = 0<<INT0;
+	int count_temp = count;
+	for (int i = 0;  i < 16; i++ )
 	{
-	timer++;
-	}*/
-	interruptFlag = 1;
+		while (time <80000)
+		{
+			time++;
+		}
+		time = 0;
+		count_temp++;
+		PORTC = ~count_temp;
+	}
+	
+	
+	//for (int time = 0; time<160000; time++) {};
+	
+	//EIMSK = 1<<INT0;
+	//sei(); //Enable Global Interrupt
+	EIFR = 1<<INTF0;
+	//TCCR0B = 0x02;
 }
 
 //Interrupt Service Routine for INT1
 ISR(INT1_vect)
-{
-	/*PORTC = count;
-	wait(250);
+{	
+	//TCCR0B = 0x00;
+	long time = 0;
+	//EIMSK = 0<<INT1;
+	
+	PORTC = ~0b00000000;
+	while (time <160000)
+	{
+		time++;
+	}
+	time = 0;
+	PORTC = ~0b00001001;
+	while (time <160000)
+	{
+		time++;
+	}
+	time = 0;
+	PORTC = ~0b00001111;
+	while (time <160000)
+	{
+		time++;
+	}
+	time = 0;
+	PORTC = ~0b00000110;
+	while (time <160000)
+	{
+		time++;
+	}
+	time = 0;
+	PORTC = ~0b00000000;
+	while (time <160000)
+	{
+		time++;
+	}
+	time = 0;
+	
+	
+	//EIMSK = 1<<INT1;
+	//TCCR0B = 0x02;
+	//sei(); //Enable Global Interrupt
+	EIFR = 1<<INTF1;
+}
 
-	count--;	
-	if (count == 0)
-	{count = 15;}*/
+int main(void)
+{
+	DDRD = 0<<PD2 | 0<<PD3;// Set PD2 and PD3 as input (For use as interrupts INT0 and INT1)
+	//PORTD = 1<<PD2 | 1<<PD3;// Enable PD2 and PD3 pull-up resistors
+	DDRC = 0b11111111; // Set PORTC as output
+	EICRA = 1<<ISC01 | 1<<ISC00 | 1<<ISC11 | 1<<ISC10;// Trigger INT0 on rising edge; Trigger INT1 on falling edge
+	EIMSK = 1<<INT1 | 1<<INT0;// Enable INT1 and INT0
+	sei(); //Enable Global Interrupt
+	while(1)
+	{
+		PORTC = ~count;
+		wait(250);
+		if (count >= 8){
+			count = 1;
+		}
+		else {
+			count= count*2;
+		}
+		
+		// The main loop -- create some changing display on the LEDs attached to PORTC
+	}
+	return(0);
+}
+
+void wait(int msec) {
+	while (msec > 0) {
+		delayNms_timer();
+		msec = msec - 2;
+	}
+}
+
+void delayNms_timer() {
+	TCCR0A = 0;
+	TCNT0 = 5;
+	
+	//TCCR0B = 1<<CS01 | 1<< CS00;
+	TCCR0B = 0x02;
+	
+	while ((TIFR0 & (0x1<<TOV0)) == 0);
+	
+	TCCR0B = 0;
+	TIFR0 = 1<<TOV0;
 }
