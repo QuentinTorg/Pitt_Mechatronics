@@ -3,29 +3,31 @@ MechatronicsLab7.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000004  00800100  0000017c  00000210  2**0
+  0 .data         00000000  00800100  00800100  00000250  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000017c  00000000  00000000  00000094  2**1
+  1 .text         000001dc  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000006  00800104  00800104  00000214  2**0
+  2 .bss          00000002  00800100  00800100  00000250  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000214  2**0
+  3 .comment      00000030  00000000  00000000  00000250  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000244  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000280  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000020  00000000  00000000  00000284  2**0
+  5 .debug_aranges 00000030  00000000  00000000  000002c0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000000bd  00000000  00000000  000002a4  2**0
+  6 .debug_info   000001b6  00000000  00000000  000002f0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000064  00000000  00000000  00000361  2**0
+  7 .debug_abbrev 00000110  00000000  00000000  000004a6  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000000b7  00000000  00000000  000003c5  2**0
+  8 .debug_line   000000e4  00000000  00000000  000005b6  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000024  00000000  00000000  0000047c  2**2
+  9 .debug_frame  00000090  00000000  00000000  0000069c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000161  00000000  00000000  000004a0  2**0
+ 10 .debug_str    0000019d  00000000  00000000  0000072c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000010  00000000  00000000  00000601  2**0
+ 11 .debug_loc    000001fb  00000000  00000000  000008c9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000038  00000000  00000000  00000ac4  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -70,18 +72,18 @@ Disassembly of section .text:
   74:	11 e0       	ldi	r17, 0x01	; 1
   76:	a0 e0       	ldi	r26, 0x00	; 0
   78:	b1 e0       	ldi	r27, 0x01	; 1
-  7a:	ec e7       	ldi	r30, 0x7C	; 124
+  7a:	ec ed       	ldi	r30, 0xDC	; 220
   7c:	f1 e0       	ldi	r31, 0x01	; 1
   7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
   80:	05 90       	lpm	r0, Z+
   82:	0d 92       	st	X+, r0
-  84:	a4 30       	cpi	r26, 0x04	; 4
+  84:	a0 30       	cpi	r26, 0x00	; 0
   86:	b1 07       	cpc	r27, r17
   88:	d9 f7       	brne	.-10     	; 0x80 <__do_copy_data+0xc>
 
 0000008a <__do_clear_bss>:
   8a:	21 e0       	ldi	r18, 0x01	; 1
-  8c:	a4 e0       	ldi	r26, 0x04	; 4
+  8c:	a0 e0       	ldi	r26, 0x00	; 0
   8e:	b1 e0       	ldi	r27, 0x01	; 1
   90:	01 c0       	rjmp	.+2      	; 0x94 <.do_clear_bss_start>
 
@@ -89,156 +91,255 @@ Disassembly of section .text:
   92:	1d 92       	st	X+, r1
 
 00000094 <.do_clear_bss_start>:
-  94:	aa 30       	cpi	r26, 0x0A	; 10
+  94:	a2 30       	cpi	r26, 0x02	; 2
   96:	b2 07       	cpc	r27, r18
   98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
-  9a:	0e 94 53 00 	call	0xa6	; 0xa6 <main>
-  9e:	0c 94 bc 00 	jmp	0x178	; 0x178 <_exit>
+  9a:	0e 94 64 00 	call	0xc8	; 0xc8 <main>
+  9e:	0c 94 ec 00 	jmp	0x1d8	; 0x1d8 <_exit>
 
 000000a2 <__bad_interrupt>:
   a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-000000a6 <main>:
-long delay = 8000000; //set a time to delay
-long loopVar = 0; //initialize a looping variable
+000000a6 <setMotor>:
+
+	}
+}
+
+void setMotor(int PWM_speed) {
+	if (PWM_speed > 0){
+  a6:	18 16       	cp	r1, r24
+  a8:	19 06       	cpc	r1, r25
+  aa:	1c f4       	brge	.+6      	; 0xb2 <setMotor+0xc>
+		
+		OCR0A = PWM_speed;
+  ac:	87 bd       	out	0x27, r24	; 39
+		OCR0B = 0;
+  ae:	18 bc       	out	0x28, r1	; 40
+  b0:	08 95       	ret
+	}
+	else if( PWM_speed < 0){
+  b2:	99 23       	and	r25, r25
+  b4:	34 f4       	brge	.+12     	; 0xc2 <setMotor+0x1c>
+		PWM_speed *= -1;
+  b6:	91 95       	neg	r25
+  b8:	81 95       	neg	r24
+  ba:	91 09       	sbc	r25, r1
+		OCR0B = PWM_speed;
+  bc:	88 bd       	out	0x28, r24	; 40
+		OCR0A = 0;
+  be:	17 bc       	out	0x27, r1	; 39
+  c0:	08 95       	ret
+	}
+	else {
+		OCR0B = 0;
+  c2:	18 bc       	out	0x28, r1	; 40
+		OCR0A = 0;
+  c4:	17 bc       	out	0x27, r1	; 39
+  c6:	08 95       	ret
+
+000000c8 <main>:
+
+
 
 int main(void)
 {
 	DDRD = 0xFF; // Sets all pins of Port D to output.
-  a6:	8f ef       	ldi	r24, 0xFF	; 255
-  a8:	8a b9       	out	0x0a, r24	; 10
-	PORTD = 0b000000100; //Sets Port D to match the initial
-  aa:	84 e0       	ldi	r24, 0x04	; 4
-  ac:	8b b9       	out	0x0b, r24	; 11
+  c8:	8f ef       	ldi	r24, 0xFF	; 255
+  ca:	8a b9       	out	0x0a, r24	; 10
 	
-	OCR0A = 0x00; // Load $00 into OCR0 to set initial duty cycle to 0 (motor off)
-  ae:	17 bc       	out	0x27, r1	; 39
+	OCR0A = 0xff; // for PD6, pin12.  Load $00 into OCR0 to set initial duty cycle to 0 (motor off)
+  cc:	87 bd       	out	0x27, r24	; 39
+	OCR0B = 0xff; // for PD5, pin11.  Load $00 into OCR0 to set initial duty cycle to 0 (motor off)
+  ce:	88 bd       	out	0x28, r24	; 40
 	
-	TCCR0A = 1<<COM0A1 | 1<<WGM01 | 1<<WGM00; // Set non?inverting mode on OC0A pin (COMA1:0 and COMB0:1 bits = bits 7:4 = 1000; Fast PWM (WGM1:0 bits = bits 1:0 = 11)
-  b0:	83 e8       	ldi	r24, 0x83	; 131
-  b2:	84 bd       	out	0x24, r24	; 36
-	TCCR0B = 0<<CS02 | 1<<CS01 | 1<<CS00; // Set base PWM frequency (CS02:0 ? bits 2?0 = 011 for prescaler of 64, for approximately 1kHz base frequency)
-  b4:	83 e0       	ldi	r24, 0x03	; 3
-  b6:	85 bd       	out	0x25, r24	; 37
+	TCCR0A = 1<<COM0A1 | 1<<COM0B1 | 1<<WGM01 | 1<<WGM00; // Set non?inverting mode on OC0A pin (COMA1:0 and COMB0:1 bits = bits 7:4 = 1000; Fast PWM (WGM1:0 bits = bits 1:0 = 11)
+  d0:	83 ea       	ldi	r24, 0xA3	; 163
+  d2:	84 bd       	out	0x24, r24	; 36
+	TCCR0B = 1<<CS02 | 0<<CS01 | 0<<CS00; // Set base PWM frequency (CS02:0 ? bits 2?0 = 011 for prescaler of 64, for approximately 1kHz base frequency)
+  d4:	84 e0       	ldi	r24, 0x04	; 4
+  d6:	85 bd       	out	0x25, r24	; 37
 	// PWM is now running on selected pin at selected duty cycle
+
+	
 	
 	// Set up ADC
 	DDRC = 0x00; // define all Port C bits as input
-  b8:	17 b8       	out	0x07, r1	; 7
+  d8:	17 b8       	out	0x07, r1	; 7
 	PRR = 0x00; // clear Power Reduction ADC bit (0) in PRR register
-  ba:	10 92 64 00 	sts	0x0064, r1
+  da:	10 92 64 00 	sts	0x0064, r1
 	ADCSRA = 1<<ADEN | 1<<ADPS2 | 1<<ADPS1 | 1<<ADPS0; // 0x87 or 0b10000111 // Set ADC Enable bit (7) in ADCSRA register, and set ADC prescaler to 128 (bits 2-0 of ADCSRA = ADPS2-ADPS0 = 111)
-  be:	ea e7       	ldi	r30, 0x7A	; 122
-  c0:	f0 e0       	ldi	r31, 0x00	; 0
-  c2:	87 e8       	ldi	r24, 0x87	; 135
-  c4:	80 83       	st	Z, r24
+  de:	87 e8       	ldi	r24, 0x87	; 135
+  e0:	80 93 7a 00 	sts	0x007A, r24
 	//enable ADC and set frequency (with a prescaler of 128)
 	ADMUX = 0<<REFS1 | 1<<REFS0 | 1<<ADLAR; //0x60 or 0b01100000 // select Analog Reference voltage to be AVcc (bits 7-6 of ADMUX = 01),
-  c6:	80 e6       	ldi	r24, 0x60	; 96
-  c8:	80 93 7c 00 	sts	0x007C, r24
-	//left justification (bit 5 of ADMUX = ADLAR = 1) and select channel 0 (bits 3-0 of ADMUX = MUX3-MUX0 = 000)
+  e4:	80 e6       	ldi	r24, 0x60	; 96
+  e6:	80 93 7c 00 	sts	0x007C, r24
 
-	//Initialize the sensorValue a second time :)
-	ADCSRA |= (1<<ADSC); // Start conversion
-  cc:	80 81       	ld	r24, Z
-  ce:	80 64       	ori	r24, 0x40	; 64
-  d0:	80 83       	st	Z, r24
-	while ((ADCSRA & (1<<ADIF)) ==0); // wait for conversion to finish
-  d2:	80 81       	ld	r24, Z
-  d4:	84 ff       	sbrs	r24, 4
-  d6:	fd cf       	rjmp	.-6      	; 0xd2 <main+0x2c>
-	sensorValue = ADCH;  //Assigns sensorValue to be the high 8 bits of the 10 bit ADC converter
-  d8:	80 91 79 00 	lds	r24, 0x0079
-  dc:	90 e0       	ldi	r25, 0x00	; 0
-  de:	90 93 09 01 	sts	0x0109, r25
-  e2:	80 93 08 01 	sts	0x0108, r24
 	
 	while (1)
 	{
 		// Read analog input: begin ADC
 		ADCSRA |= (1<<ADSC); // Start conversion
-  e6:	ea e7       	ldi	r30, 0x7A	; 122
-  e8:	f0 e0       	ldi	r31, 0x00	; 0
-		while ((ADCSRA & (1<<ADIF)) ==0); // wait for conversion to finish
-		sensorValue = ADCH; // Keep high byte of 10-bit result (throw away lowest two bits)
-  ea:	c9 e7       	ldi	r28, 0x79	; 121
+  ea:	ca e7       	ldi	r28, 0x7A	; 122
   ec:	d0 e0       	ldi	r29, 0x00	; 0
-		//ADC Complete
-		
-		OCR0A = 0xff; // Load a number between 0?255 into OCR0A to set the duty cycle (0 = motor off, 255 = motor full on)
-  ee:	2f ef       	ldi	r18, 0xFF	; 255
-  f0:	ff 24       	eor	r15, r15
-  f2:	f3 94       	inc	r15
-  f4:	00 e0       	ldi	r16, 0x00	; 0
-  f6:	10 e0       	ldi	r17, 0x00	; 0
-  f8:	30 e0       	ldi	r19, 0x00	; 0
-	sensorValue = ADCH;  //Assigns sensorValue to be the high 8 bits of the 10 bit ADC converter
+		while ((ADCSRA & (1<<ADIF)) ==0); // wait for conversion to finish
+		sensorValue = ADCH; // Keep high byte of 10-bit result (throw away lowest two bits)
+  ee:	09 e7       	ldi	r16, 0x79	; 121
+  f0:	10 e0       	ldi	r17, 0x00	; 0
+	}
+}
+
+long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  f2:	c1 2c       	mov	r12, r1
+  f4:	d1 2c       	mov	r13, r1
+  f6:	76 01       	movw	r14, r12
+  f8:	ca 94       	dec	r12
+
 	
 	while (1)
 	{
 		// Read analog input: begin ADC
 		ADCSRA |= (1<<ADSC); // Start conversion
-  fa:	80 81       	ld	r24, Z
+  fa:	88 81       	ld	r24, Y
   fc:	80 64       	ori	r24, 0x40	; 64
-  fe:	80 83       	st	Z, r24
+  fe:	88 83       	st	Y, r24
 		while ((ADCSRA & (1<<ADIF)) ==0); // wait for conversion to finish
- 100:	80 81       	ld	r24, Z
+ 100:	88 81       	ld	r24, Y
  102:	84 ff       	sbrs	r24, 4
- 104:	fd cf       	rjmp	.-6      	; 0x100 <main+0x5a>
+ 104:	fd cf       	rjmp	.-6      	; 0x100 <main+0x38>
 		sensorValue = ADCH; // Keep high byte of 10-bit result (throw away lowest two bits)
- 106:	88 81       	ld	r24, Y
- 108:	90 e0       	ldi	r25, 0x00	; 0
- 10a:	90 93 09 01 	sts	0x0109, r25
- 10e:	80 93 08 01 	sts	0x0108, r24
+ 106:	f8 01       	movw	r30, r16
+ 108:	80 81       	ld	r24, Z
+ 10a:	28 2f       	mov	r18, r24
+ 10c:	30 e0       	ldi	r19, 0x00	; 0
+ 10e:	30 93 01 01 	sts	0x0101, r19
+ 112:	20 93 00 01 	sts	0x0100, r18
+	}
+}
+
+long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+ 116:	ae ef       	ldi	r26, 0xFE	; 254
+ 118:	b1 e0       	ldi	r27, 0x01	; 1
+ 11a:	0e 94 bb 00 	call	0x176	; 0x176 <__umulhisi3>
+ 11e:	a7 01       	movw	r20, r14
+ 120:	96 01       	movw	r18, r12
+ 122:	0e 94 9c 00 	call	0x138	; 0x138 <__divmodsi4>
+ 126:	da 01       	movw	r26, r20
+ 128:	c9 01       	movw	r24, r18
+ 12a:	8f 5f       	subi	r24, 0xFF	; 255
+ 12c:	91 09       	sbc	r25, r1
+ 12e:	a1 09       	sbc	r26, r1
+ 130:	b1 09       	sbc	r27, r1
+		ADCSRA |= (1<<ADSC); // Start conversion
+		while ((ADCSRA & (1<<ADIF)) ==0); // wait for conversion to finish
+		sensorValue = ADCH; // Keep high byte of 10-bit result (throw away lowest two bits)
 		//ADC Complete
 		
-		OCR0A = 0xff; // Load a number between 0?255 into OCR0A to set the duty cycle (0 = motor off, 255 = motor full on)
- 112:	27 bd       	out	0x27, r18	; 39
-		
-		//A time delay
-		loopVar = 0;
- 114:	10 92 04 01 	sts	0x0104, r1
- 118:	10 92 05 01 	sts	0x0105, r1
- 11c:	10 92 06 01 	sts	0x0106, r1
- 120:	10 92 07 01 	sts	0x0107, r1
-		while (loopVar < delay)
- 124:	40 91 00 01 	lds	r20, 0x0100
- 128:	50 91 01 01 	lds	r21, 0x0101
- 12c:	60 91 02 01 	lds	r22, 0x0102
- 130:	70 91 03 01 	lds	r23, 0x0103
- 134:	14 16       	cp	r1, r20
- 136:	15 06       	cpc	r1, r21
- 138:	16 06       	cpc	r1, r22
- 13a:	17 06       	cpc	r1, r23
- 13c:	f4 f6       	brge	.-68     	; 0xfa <main+0x54>
- 13e:	80 e0       	ldi	r24, 0x00	; 0
- 140:	90 e0       	ldi	r25, 0x00	; 0
- 142:	dc 01       	movw	r26, r24
- 144:	01 96       	adiw	r24, 0x01	; 1
- 146:	a1 1d       	adc	r26, r1
- 148:	b1 1d       	adc	r27, r1
- 14a:	84 17       	cp	r24, r20
- 14c:	95 07       	cpc	r25, r21
- 14e:	a6 07       	cpc	r26, r22
- 150:	b7 07       	cpc	r27, r23
- 152:	c4 f3       	brlt	.-16     	; 0x144 <main+0x9e>
- 154:	14 16       	cp	r1, r20
- 156:	15 06       	cpc	r1, r21
- 158:	16 06       	cpc	r1, r22
- 15a:	17 06       	cpc	r1, r23
- 15c:	24 f0       	brlt	.+8      	; 0x166 <main+0xc0>
- 15e:	4f 2d       	mov	r20, r15
- 160:	50 2f       	mov	r21, r16
- 162:	61 2f       	mov	r22, r17
- 164:	73 2f       	mov	r23, r19
- 166:	40 93 04 01 	sts	0x0104, r20
- 16a:	50 93 05 01 	sts	0x0105, r21
- 16e:	60 93 06 01 	sts	0x0106, r22
- 172:	70 93 07 01 	sts	0x0107, r23
- 176:	c1 cf       	rjmp	.-126    	; 0xfa <main+0x54>
+		setMotor(map(sensorValue, 0, 255, -255, 255));
+ 132:	0e 94 53 00 	call	0xa6	; 0xa6 <setMotor>
 
-00000178 <_exit>:
- 178:	f8 94       	cli
+	}
+ 136:	e1 cf       	rjmp	.-62     	; 0xfa <main+0x32>
 
-0000017a <__stop_program>:
- 17a:	ff cf       	rjmp	.-2      	; 0x17a <__stop_program>
+00000138 <__divmodsi4>:
+ 138:	05 2e       	mov	r0, r21
+ 13a:	97 fb       	bst	r25, 7
+ 13c:	1e f4       	brtc	.+6      	; 0x144 <__divmodsi4+0xc>
+ 13e:	00 94       	com	r0
+ 140:	0e 94 b3 00 	call	0x166	; 0x166 <__negsi2>
+ 144:	57 fd       	sbrc	r21, 7
+ 146:	07 d0       	rcall	.+14     	; 0x156 <__divmodsi4_neg2>
+ 148:	0e 94 ca 00 	call	0x194	; 0x194 <__udivmodsi4>
+ 14c:	07 fc       	sbrc	r0, 7
+ 14e:	03 d0       	rcall	.+6      	; 0x156 <__divmodsi4_neg2>
+ 150:	4e f4       	brtc	.+18     	; 0x164 <__divmodsi4_exit>
+ 152:	0c 94 b3 00 	jmp	0x166	; 0x166 <__negsi2>
+
+00000156 <__divmodsi4_neg2>:
+ 156:	50 95       	com	r21
+ 158:	40 95       	com	r20
+ 15a:	30 95       	com	r19
+ 15c:	21 95       	neg	r18
+ 15e:	3f 4f       	sbci	r19, 0xFF	; 255
+ 160:	4f 4f       	sbci	r20, 0xFF	; 255
+ 162:	5f 4f       	sbci	r21, 0xFF	; 255
+
+00000164 <__divmodsi4_exit>:
+ 164:	08 95       	ret
+
+00000166 <__negsi2>:
+ 166:	90 95       	com	r25
+ 168:	80 95       	com	r24
+ 16a:	70 95       	com	r23
+ 16c:	61 95       	neg	r22
+ 16e:	7f 4f       	sbci	r23, 0xFF	; 255
+ 170:	8f 4f       	sbci	r24, 0xFF	; 255
+ 172:	9f 4f       	sbci	r25, 0xFF	; 255
+ 174:	08 95       	ret
+
+00000176 <__umulhisi3>:
+ 176:	a2 9f       	mul	r26, r18
+ 178:	b0 01       	movw	r22, r0
+ 17a:	b3 9f       	mul	r27, r19
+ 17c:	c0 01       	movw	r24, r0
+ 17e:	a3 9f       	mul	r26, r19
+ 180:	70 0d       	add	r23, r0
+ 182:	81 1d       	adc	r24, r1
+ 184:	11 24       	eor	r1, r1
+ 186:	91 1d       	adc	r25, r1
+ 188:	b2 9f       	mul	r27, r18
+ 18a:	70 0d       	add	r23, r0
+ 18c:	81 1d       	adc	r24, r1
+ 18e:	11 24       	eor	r1, r1
+ 190:	91 1d       	adc	r25, r1
+ 192:	08 95       	ret
+
+00000194 <__udivmodsi4>:
+ 194:	a1 e2       	ldi	r26, 0x21	; 33
+ 196:	1a 2e       	mov	r1, r26
+ 198:	aa 1b       	sub	r26, r26
+ 19a:	bb 1b       	sub	r27, r27
+ 19c:	fd 01       	movw	r30, r26
+ 19e:	0d c0       	rjmp	.+26     	; 0x1ba <__udivmodsi4_ep>
+
+000001a0 <__udivmodsi4_loop>:
+ 1a0:	aa 1f       	adc	r26, r26
+ 1a2:	bb 1f       	adc	r27, r27
+ 1a4:	ee 1f       	adc	r30, r30
+ 1a6:	ff 1f       	adc	r31, r31
+ 1a8:	a2 17       	cp	r26, r18
+ 1aa:	b3 07       	cpc	r27, r19
+ 1ac:	e4 07       	cpc	r30, r20
+ 1ae:	f5 07       	cpc	r31, r21
+ 1b0:	20 f0       	brcs	.+8      	; 0x1ba <__udivmodsi4_ep>
+ 1b2:	a2 1b       	sub	r26, r18
+ 1b4:	b3 0b       	sbc	r27, r19
+ 1b6:	e4 0b       	sbc	r30, r20
+ 1b8:	f5 0b       	sbc	r31, r21
+
+000001ba <__udivmodsi4_ep>:
+ 1ba:	66 1f       	adc	r22, r22
+ 1bc:	77 1f       	adc	r23, r23
+ 1be:	88 1f       	adc	r24, r24
+ 1c0:	99 1f       	adc	r25, r25
+ 1c2:	1a 94       	dec	r1
+ 1c4:	69 f7       	brne	.-38     	; 0x1a0 <__udivmodsi4_loop>
+ 1c6:	60 95       	com	r22
+ 1c8:	70 95       	com	r23
+ 1ca:	80 95       	com	r24
+ 1cc:	90 95       	com	r25
+ 1ce:	9b 01       	movw	r18, r22
+ 1d0:	ac 01       	movw	r20, r24
+ 1d2:	bd 01       	movw	r22, r26
+ 1d4:	cf 01       	movw	r24, r30
+ 1d6:	08 95       	ret
+
+000001d8 <_exit>:
+ 1d8:	f8 94       	cli
+
+000001da <__stop_program>:
+ 1da:	ff cf       	rjmp	.-2      	; 0x1da <__stop_program>
