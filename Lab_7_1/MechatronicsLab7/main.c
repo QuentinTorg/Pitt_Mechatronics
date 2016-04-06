@@ -15,7 +15,13 @@ int main(void)
 {
 	DDRD = 0xFF; // Sets all pins of Port D to output.
 	PORTD = 0b000000100; //Sets Port D to match the initial
-
+	
+	OCR0A = 0x00; // Load $00 into OCR0 to set initial duty cycle to 0 (motor off)
+	
+	TCCR0A = 1<<COM0A1 | 1<<WGM01 | 1<<WGM00; // Set non?inverting mode on OC0A pin (COMA1:0 and COMB0:1 bits = bits 7:4 = 1000; Fast PWM (WGM1:0 bits = bits 1:0 = 11)
+	TCCR0B = 0<<CS02 | 1<<CS01 | 1<<CS00; // Set base PWM frequency (CS02:0 ? bits 2?0 = 011 for prescaler of 64, for approximately 1kHz base frequency)
+	// PWM is now running on selected pin at selected duty cycle
+	
 	// Set up ADC
 	DDRC = 0x00; // define all Port C bits as input
 	PRR = 0x00; // clear Power Reduction ADC bit (0) in PRR register
@@ -37,7 +43,7 @@ int main(void)
 		sensorValue = ADCH; // Keep high byte of 10-bit result (throw away lowest two bits)
 		//ADC Complete
 		
-		
+		OCR0A = 0xff; // Load a number between 0?255 into OCR0A to set the duty cycle (0 = motor off, 255 = motor full on)
 		
 		//A time delay
 		loopVar = 0;
