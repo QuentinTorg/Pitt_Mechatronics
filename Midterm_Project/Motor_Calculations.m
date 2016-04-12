@@ -84,25 +84,33 @@ if (friction_limited_acceleration_distance < track_length)
     if (friction_limited_acceleration_distance ~= 0)
         friciton_limited_plot = ezplot(x_const_accel(t)); % plot friction limited distance vs. time in red
         disp(' ');
-        disp('friciton limited acceleration until t= ');
+        disp('Friciton limited acceleration until t= ');
         disp(friction_limited_acceleration_time);
         disp('then motor limited until the end of the ramp');
+        legend('Motor Limited','Friciton Limited');
+        text(friction_limited_acceleration_time,friction_limited_acceleration_distance,'\leftarrow  Transition from friction limited to motor limited acceleration')
     else
-        disp('motor limited for entire length of ramp');
+        legend('Motor Limited');
+        disp('Motor limited for entire length of ramp');
     end
 elseif (friction_limited_acceleration_distance >= track_length)
-    disp('this many meters travelled ');
+    disp('This many meters travelled ');
     disp(track_length);
     disp('in this many seconds ');
-    total_time = double(solve(x_const_accel(t) == track_length, t));
+    total_time = double(solve(x_const_accel(t) == track_length, t)); % solve for total time spent accelerating
     disp(total_time);
     friciton_limited_plot = ezplot(x_const_accel(t)); % plot friction limited distance vs. time in red
-    disp('friction limited for entire length of ramp');
+    disp('Friction limited for entire length of ramp');
+    legend('Friction Limited');
 end
-    
-%friction_limited_acceleration_distance
 
+
+title(['Distance vs. Time']);
 axis([0 (total_time + .2) 0 2.2]);
+xlabel('Time (s)');
+ylabel('Distance (m)');
+
+
 
 % note that the plots are continuous and differentiable at
 % t=friciton_limited_acceleration_time
