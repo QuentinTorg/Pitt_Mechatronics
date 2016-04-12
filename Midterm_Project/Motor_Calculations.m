@@ -16,7 +16,7 @@ gear_ratio = 29.86; % 29.86:1 gear ratio
 number_of_motors = 2; % number of motors applying force to the ground
 
 % robot parameters
-mass = 10; % kg
+mass = 0.275; % kg
 mass_fraction_on_wheels = 1; % for 4 wheeled robot it is 1, for 2 wheel, will depend on center of gravity
 coefficient_of_friction = 0.3; % specified in problem statement
 wheel_diameter = 3.5; % cm
@@ -83,6 +83,12 @@ if (friction_limited_acceleration_distance < track_length)
     hold
     if (friction_limited_acceleration_distance ~= 0)
         friciton_limited_plot = ezplot(x_const_accel(t)); % plot friction limited distance vs. time in red
+        disp(' ');
+        disp('friciton limited acceleration until t= ');
+        disp(friction_limited_acceleration_time);
+        disp('then motor limited until the end of the ramp');
+    else
+        disp('motor limited for entire length of ramp');
     end
 elseif (friction_limited_acceleration_distance >= track_length)
     disp('this many meters travelled ');
@@ -91,6 +97,7 @@ elseif (friction_limited_acceleration_distance >= track_length)
     total_time = double(solve(x_const_accel(t) == track_length, t));
     disp(total_time);
     friciton_limited_plot = ezplot(x_const_accel(t)); % plot friction limited distance vs. time in red
+    disp('friction limited for entire length of ramp');
 end
     
 %friction_limited_acceleration_distance
