@@ -9,8 +9,8 @@ close ALL
 close ALL HIDDEN
 
 % motor parameters from spec sheet
-stall_torque = 0.03; % kg-cm before gearbox
-free_run_speed = 30000; % RPM before gearbox
+stall_torque = 0.02; % kg-cm before gearbox
+free_run_speed = 13000; % RPM before gearbox
 nominal_voltage = 6; % Volts nominal voltage on the motor spec sheet
 gear_ratio = 4.995; % 4.995:1 gear ratio
 number_of_motors = 2; % number of motors applying force to the ground
