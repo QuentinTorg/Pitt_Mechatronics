@@ -9,10 +9,10 @@ close ALL
 close ALL HIDDEN
 
 % motor parameters from spec sheet
-stall_torque = 0.02; % kg-cm before gearbox
-free_run_speed = 13000; % RPM before gearbox
+stall_torque = 0.03; % kg-cm before gearbox
+free_run_speed = 30000; % RPM before gearbox
 nominal_voltage = 6; % Volts nominal voltage on the motor spec sheet
-gear_ratio = 5; % 29.86:1 gear ratio
+gear_ratio = 4.995; % 4.995:1 gear ratio
 number_of_motors = 2; % number of motors applying force to the ground
 
 % robot parameters
@@ -39,9 +39,9 @@ friction_limited_accel = (max_friction_force - mass * 9.81 * sin(incline_angle))
 
 if (max_friction_force < stall_force) % if there is friction limited acceleration
     friction_limited_top_velocity = (max_friction_force - stall_force) / (stall_force / -free_run_velocity); % m/s - motors will accelerate to this velocity while using thier maxium friciton
-    friction_limited_acceleration_distance = (friction_limited_top_velocity^2) / (2 * friction_limited_accel); % m - distance spent accelerating at the friciton limit
+    friction_limited_acceleration_distance = (friction_limited_top_velocity^2) / (2 * friction_limited_accel) % m - distance spent accelerating at the friciton limit
     friction_limited_acceleration_time = friction_limited_top_velocity / (friction_limited_accel); % s - time spent accelerating at the limit of friction
-elseif (max_friction_force >= stall_force) % if there is no friciton limited acceleration
+elseif (max_friction_force >= stall_force) % if there is no friciton limited acceleration, set all friction limited values to zero
     friction_limited_top_velocity = 0;
     friction_limited_acceleration_distance = 0;
     friction_limited_acceleration_time = 0;
@@ -65,21 +65,15 @@ x(t) = dsolve(Dx * stall_force / (-free_run_velocity) + stall_force - mass * 9.8
 syms x_const_accel(t)
 x_const_accel(t) = 0.5 * friction_limited_accel * t^2; 
 
-
+if (mass * 9.81 * sin(incline_angle) > stall_force)
+    disp('ERROR, THE SPECIFIED PARAMETERS WILL NOT ALLOW THE ROBOT TO ACCELERATE IN A POSITIVE DIRECTION');
+else
 % decide if the motor is ever friction limited
 if (friction_limited_acceleration_distance < track_length)
 
-    % solve for time to travel the track length numerically b/c can't solve
-    % algebraically.  This takes time because equation is complex
-    %while (total_distance < track_length)
-    %    total_time = total_time + 0.001;
-    %    total_distance = x(total_time);
-    %end
-    
-    
+    % solve for time to travel the track length
     assume(t > friction_limited_acceleration_time);
-    total_time = vpasolve(x(t) == track_length, t, friction_limited_acceleration_time + .5);
-    
+    total_time = vpasolve(x(t) == track_length, t, friction_limited_acceleration_time+.5);
     
     disp('this many meters travelled ');
     disp(double(track_length)); % shows how close to 2 meters the numerical calculation was
@@ -168,14 +162,31 @@ ylabel('Voltage (V)');
 
 
 
+% display requested values
+disp('wheel rotation speed at the top of the incline is (units of RPM)');
+if (friction_limited_acceleration_distance >= track_length)
+    disp((double(subs(friction_limited_velocity(t),t,double(total_time))*60/(pi*wheel_diameter)*(nominal_voltage/running_voltage))));
+else
+    disp((double(subs(diff(x,t),t,double(total_time)))*60/(pi*wheel_diameter)*(nominal_voltage/running_voltage)));
+end
+disp('the theoretical maximum wheel rotation speed under no load and nominal voltage is (units of RPM) ');
+disp((free_run_speed / gear_ratio));
+disp('The total time spent climbing the track is (units seconds)');
+disp(total_time);
+disp('The time spent accelerating under friction limited conditions is (units of seconds)');
+if (friction_limited_acceleration_distance >= track_length)
+    disp(double(total_time))
+    disp('0')
+else
+    disp(friction_limited_acceleration_time);
+    disp('The time spent accelerating under motor limited conditions is  (units of seconds)');
+    disp((total_time - friction_limited_acceleration_time));
+end
 
-    
-    
-    
-    
-    
-    
-    
+end
+
+
+
 
 
 
