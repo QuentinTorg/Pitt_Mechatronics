@@ -10,16 +10,16 @@ close ALL HIDDEN
 
 % motor parameters from spec sheet
 stall_torque = 0.02; % kg-cm before gearbox
-free_run_speed = 30000; % RPM before gearbox
+free_run_speed = 13000; % RPM before gearbox
 nominal_voltage = 6; % Volts nominal voltage on the motor spec sheet
-gear_ratio = 30; % 29.86:1 gear ratio
+gear_ratio = 5; % 29.86:1 gear ratio
 number_of_motors = 2; % number of motors applying force to the ground
 
 % robot parameters
-mass = .275; % kg
+mass = .35; % kg
 mass_fraction_on_wheels = 1; % for 4 wheeled robot it is 1, for 2 wheel, will depend on center of gravity
 coefficient_of_friction = 0.3; % specified in problem statement
-running_voltage = 3; % voltage that powers the robot
+running_voltage = 6; % voltage that powers the robot
 wheel_diameter = 3.5; % cm
 
 % track parameters
@@ -86,16 +86,16 @@ if (friction_limited_acceleration_distance < track_length)
     disp('in this many seconds ');
     disp(total_time); % is the total time it takes to reach the end of the ramp
     
-    motor_limited_plot = ezplot(x(t)); % plot motor limited distance vs. time in blue
+    motor_limited_plot = ezplot(x(t),[friction_limited_acceleration_time, double(total_time + 0.4)]); % plot motor limited distance vs. time in blue
     hold
     if (friction_limited_acceleration_distance ~= 0)
-        friciton_limited_plot = ezplot(x_const_accel(t)); % plot friction limited distance vs. time in red
+        friction_limited_plot = ezplot(x_const_accel(t),[0 friction_limited_acceleration_time]); % plot friction limited distance vs. time in red
         disp(' ');
         disp('Friciton limited acceleration until t= ');
         disp(friction_limited_acceleration_time);
         disp('then motor limited until the end of the ramp');
         legend('Motor Limited','Friciton Limited');
-        text(friction_limited_acceleration_time,friction_limited_acceleration_distance,'\leftarrow  Transition from friction limited to motor limited acceleration')
+        text(friction_limited_acceleration_time,friction_limited_acceleration_distance,'\leftarrow  Friction limited to motor limited transition')
     else
         legend('Motor Limited');
         disp('Motor limited for entire length of ramp');
@@ -106,17 +106,17 @@ elseif (friction_limited_acceleration_distance >= track_length)
     disp('in this many seconds ');
     total_time = double(solve(x_const_accel(t) == track_length, t)); % solve for total time spent accelerating
     disp(total_time);
-    friciton_limited_plot = ezplot(x_const_accel(t)); % plot friction limited distance vs. time in red
+    friciton_limited_plot = ezplot(x_const_accel(t),[0 (friction_limited_acceleration_time+0.4)]); % plot friction limited distance vs. time in red
     disp('Friction limited for entire length of ramp');
     legend('Friction Limited');
 end
 
 % make graph pretty
 title(['Distance vs. Time']);
-axis([0 (double(total_time + .2)) 0 2.2]);
+axis([0 (double(total_time + .4)) 0 2.4]);
 xlabel('Time (s)');
 ylabel('Distance (m)');
-
+figure
 
 % note that the plots are continuous and differentiable at
 % t=friciton_limited_acceleration_time
@@ -126,18 +126,56 @@ ylabel('Distance (m)');
 
 
 
+% make voltage versus time plots
+
+syms motor_limited_voltage(t)
+syms friction_limited_voltage(t)
+syms velocity(t)
+
+friction_limited_velocity(t) = diff(x_const_accel(t),t); % equation for velocity vs time during friction limited
+friction_limited_voltage(t) = (max_friction_force + friction_limited_velocity(t)*(stall_force / free_run_velocity)) * (nominal_voltage / stall_force); % equation for friction limited voltage vs time
+motor_limited_voltage(t) = running_voltage; % when motor limited, always run at max voltage to maximize acceleration curve
+
+if (friction_limited_acceleration_distance < track_length) % if friction limited for less than track length
+    ezplot(motor_limited_voltage(t) , [friction_limited_acceleration_time, double(total_time + 0.4)]);
+    hold
+    
+    if (friction_limited_acceleration_distance ~= 0) % if friction limited for some portion of the track
+        ezplot(friction_limited_voltage(t),[0, friction_limited_acceleration_time]);
+        text(friction_limited_acceleration_time,running_voltage,'Friction limited to motor limited transition \rightarrow','HorizontalAlignment','right');
+        legend('Motor Limited','Friciton Limited');
+        disp('Voltage follows the following function until the friction limited to motor limited transition')
+        disp(friction_limited_voltage(t));
+        disp('Then voltage remains at the following running voltage until the end of the ramp');
+        disp(running_voltage);
+    else % if always motor limited
+        legend('Motor Limited');
+        disp('Voltage always set to running voltage to maximize acceleration. Run at the following voltage');
+        disp(running_voltage);
+    end
+elseif (friction_limited_acceleration_distance >= track_length) % if friction limited for entire track length
+    ezplot(friction_limited_voltage(t),[0 (friction_limited_acceleration_time+0.4)]);
+    legend('voltage follows this function for entire length of ramp');
+    disp(friction_limited_voltage(t));
+end
+
+
+% make graph pretty
+title(['Voltage vs. Time']);
+axis([0 (double(total_time + .4)) 0 (running_voltage+1.5)]);
+xlabel('Time (s)');
+ylabel('Voltage (V)');
 
 
 
 
-
-
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
 
 
 
