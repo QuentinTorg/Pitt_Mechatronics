@@ -27,7 +27,7 @@ void digitalWritePortD(uint8_t pin, uint8_t val);
 int sensor_value = 0; // value read from analog sensor (0 - 1023)
 int step_current = 0; //Variables corresponding to the stepper's steps
 int desired_location = 0;
-long delay_between_steps = 500; //set a time to delay between steps
+long delay_between_steps = 5; //set a time to delay between steps
 int loops_per_milli = 1;
 
 uint8_t portB_value = 0b00000000;
@@ -78,19 +78,21 @@ int main(void)
 		desired_location = sensor_value * 50; //The times four comes from we needed more steps per degree from potentiometer
 		
 		//Stepper Stuff
-		//updateStepper(desired_location);
+		updateStepper(desired_location);
 		
 		//A time delay to accommodate out stepper
-		//delay_ms(delay_between_steps);
+		delay_us(delay_between_steps);
 		
-		OCR1A=45;   //0 degree
-		delay_ms(1000);
+		
+		
+		//OCR1A=45;   //0 degree
+		//delay_ms(1000);
 
 		//OCR1A=92;  //90 degree
 		//delay_ms(5000);
 
-		OCR1A=145;  //135 degree
-		delay_ms(1000);
+		//OCR1A=145;  //135 degree
+		//delay_ms(1000);
 
 
 	}
