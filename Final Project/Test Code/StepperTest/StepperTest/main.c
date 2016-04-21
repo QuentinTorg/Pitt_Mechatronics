@@ -29,6 +29,10 @@ int step_current = 0; //Variables corresponding to the stepper's steps
 int desired_location = 0;
 long delay_between_steps = 5; //set a time to delay between steps
 int loops_per_milli = 1;
+float accel_multiplier = 1.0010;
+
+int max_velocity = 50;
+long start_velocity = 100000000;
 
 uint8_t portB_value = 0b00000000;
 uint8_t portC_value = 0b00000000;
@@ -78,10 +82,10 @@ int main(void)
 		desired_location = sensor_value * 50; //The times four comes from we needed more steps per degree from potentiometer
 		
 		//Stepper Stuff
-		updateStepper(desired_location);
+		updateStepper(5000);
 		
 		//A time delay to accommodate out stepper
-		delay_us(delay_between_steps);
+		//delay_us(delay_between_steps);
 		
 		
 		
@@ -102,28 +106,73 @@ int main(void)
 
 int updateStepper(int step_desired)
 {
-	int adder_var = 0;
+	int step_start = step_current;
+	int accel_distance = 0;
+	int accel_sign = 0;
+	int distance_from_start = 0;
+	int velocity_sign = 0;
+	int current_velocity = start_velocity;
+	int steps_to_max_velocity = 0;
 	
-	if (step_desired > step_current)
-	{
-		digitalWritePortD(direction_pin, HIGH);
-		adder_var = 1;
+	if (step_desired > step_current) {
+		accel_sign = 1;
+		velocity_sign = 1;
 	}
-	else if (step_desired < step_current)
-	{
-		digitalWritePortD(direction_pin, LOW);
-		adder_var = -1;
+	else if (step_desired < step_current) {
+		accel_sign = -1;
+		velocity_sign = -1;
 	}
+	else {
+		return step_current;
+	}
+	
+	
+			int adder_var = 0;
+			if (step_desired > step_current)
+			{
+				digitalWritePortD(direction_pin, HIGH);
+				adder_var = 1;
+			}
+			else if (step_desired < step_current)
+			{
+				digitalWritePortD(direction_pin, LOW);
+				adder_var = -1;
+			}
+	
+	
+	while (step_current != step_desired){
+		
 
-	if (adder_var != 0)
-	{
-		// write pin high then low for a single pulse
-		digitalWritePortD(step_pin, HIGH);
-		digitalWritePortD(step_pin, LOW);
+		if (adder_var != 0)
+		{
+			// write pin high then low for a single pulse
+			digitalWritePortD(step_pin, HIGH);
+			digitalWritePortD(step_pin, LOW);
+		}
+		// increment current position
+		step_current += adder_var;
+		
+		delay_us(current_velocity);
+		if (velocity_sign == accel_sign) {
+			current_velocity = current_velocity / accel_multiplier;
+		}
+		else {
+			current_velocity = current_velocity * accel_multiplier;
+		}
+		
+		if (current_velocity < max_velocity){
+			current_velocity = max_velocity;
+		}
+		
+		if ((current_velocity != max_velocity) && (accel_sign == velocity_sign) && (steps_to_max_velocity < abs(step_current - step_desired))) {
+			steps_to_max_velocity++;
+		}
+		else if (steps_to_max_velocity > abs(step_current - step_desired)){
+			accel_sign = -accel_sign;
+		}
+		
+		
 	}
-	// increment current position
-	step_current += adder_var;
-	// return current position in case required for a wait function
 	return step_current;
 }
 
