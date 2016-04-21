@@ -11,6 +11,8 @@
 //#include "max7219led8x8.h"
 #include <stdlib.h>
 
+//
+
 #define MAX7219_DIN		PD5	// DI,	Pin 3 on LED8x8 Board
 #define MAX7219_CS		PD6	// CS,	Pin 4 on LED8x8 Board
 #define MAX7219_CLK		PD7	// CLK,	Pin 5 on LED8x8 Board
@@ -29,6 +31,7 @@
 #define LOW  0
 
 void delay_ms(uint16_t count);
+void delay_us(uint16_t count);
 void digitalWritePortD(uint8_t pin, uint8_t val);
 
 uint8_t portD_value = 0b00000000; //The PortD variable for digitalWrite
@@ -47,6 +50,13 @@ int main(void)
 	
 	DDRD = 0xFF; // Sets all pins of Port D to output.
 	DDRC = 0x00; // Sets all pins of Port C to input.
+	
+	OCR0A = 0xff; // for PD6, pin12.  Load $00 into OCR0 to set initial duty cycle to 0 (motor off)
+	OCR0B = 0xff; // for PD5, pin11.  Load $00 into OCR0 to set initial duty cycle to 0 (motor off)
+	
+	TCCR0A = 1<<COM0A1 | 1<<COM0B1 | 1<<WGM01 | 1<<WGM00; // Set non?inverting mode on OC0A pin (COMA1:0 and COMB0:1 bits = bits 7:4 = 1000; Fast PWM (WGM1:0 bits = bits 1:0 = 11)
+	TCCR0B = 1<<CS02 | 0<<CS01 | 0<<CS00; // Set base PWM frequency (CS02:0 ? bits 2?0 = 011 for prescaler of 64, for approximately 1kHz base frequency)
+	// PWM is now running on selected pin at selected duty cycle
 	
 	// Set up ADC
 	DDRC = 0x00; // define all Port C bits as input
@@ -68,12 +78,14 @@ int main(void)
 	{
 		
 		digitalWritePortD(RESET, HIGH); //Sets the reset
+		delay_us(1);
 		digitalWritePortD(RESET, LOW); //Turns off the reset
+		delay_us(100);
 
 		for (int i = 0; i < 7; i++)
 		{
 			digitalWritePortD(STROBE, LOW);
-			delay_ms(30); //A time delay
+			delay_us(50); //A time delay of 30 micro seconds
 			
 			// Read analog input: begin ADC
 			ADCSRA |= (1<<ADSC); // Start conversion
@@ -82,33 +94,55 @@ int main(void)
 			//ADC Complete
 			
 			outputValues[i] = sensorValue/32.0;
+			delay_us(50);
 			digitalWritePortD(STROBE, HIGH);
+			delay_us(40);
 		}
 		
-		//max7219_buffer_out();	// Output the buffer
-		
-		for (int j = 0; j < 8; j++)
+		for (int i = 0; i < 8; i++)
 		{
-			for (int i = 0; i < outputValues[j]; i++)
+			for (int j = 0; j < 8; j++)
 			{
 				max7219_buffer_out();	// Output the buffer
-				max7219_buffer_set(j, i);	// Set pixel
-				//_delay_ms(10);
-			}
-			
-			for (int k = outputValues[j]; k < 8; k++)
-			{
-				max7219_buffer_out();	// Output the buffer
-				max7219_buffer_clr(j, k);	// Clear pixel
-				//_delay_ms(10);
+				
+				if (j < outputValues[i])
+				{
+					max7219_buffer_set(i, j);	// Set pixel
+				}
+				else
+				{
+					max7219_buffer_clr(i, j);	// Clear pixel
+				}
+				//_delay_us(5);
 			}
 		}
+		
+		
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void delay_ms(uint16_t count) {
 	while(count--) {
 		_delay_ms(1);
+	}
+}
+
+void delay_us(uint16_t count) {
+	while(count--) {
+		_delay_us(1);
 	}
 }
 
