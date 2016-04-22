@@ -8,14 +8,14 @@
 #include <avr/io.h>
 #define F_CPU 16000000UL  // 16 MHz
 #include <util/delay.h>
-//#include "max7219led8x8.h"
 #include <stdlib.h>
-
-//
+//#include "max7219led8x8.h"  //This is a useless library :(
 
 #define MAX7219_DIN		PD5	// DI,	Pin 3 on LED8x8 Board
 #define MAX7219_CS		PD6	// CS,	Pin 4 on LED8x8 Board
 #define MAX7219_CLK		PD7	// CLK,	Pin 5 on LED8x8 Board
+#define HIGH 1
+#define LOW  0
 
 #ifndef MAX7219_DIN
 #define MAX7219_DIN		PD5	// DI,	Pin 3 on LED8x8 Board
@@ -27,12 +27,18 @@
 #define MAX7219_CLK		PD7	// CLK,	Pin 5 on LED8x8 Board
 #endif
 
-#define HIGH 1
-#define LOW  0
-
 void delay_ms(uint16_t count);
 void delay_us(uint16_t count);
 void digitalWritePortD(uint8_t pin, uint8_t val);
+void max7219_byte(uint8_t data);
+void max7219_word(uint8_t address, uint8_t data);
+void max7219_init(void);
+void max7219_row(uint8_t address, uint8_t data);
+void max7219_buffer_out(void);
+void max7219_buffer_set(uint8_t x, uint8_t y);
+void max7219_buffer_clr(uint8_t x, uint8_t y);
+void max7219_buffer_row(uint8_t row, uint8_t y);
+
 
 uint8_t portD_value = 0b00000000; //The PortD variable for digitalWrite
 int sensorValue = 0; // value read from analog sensor (0 - 1023)
@@ -43,6 +49,8 @@ const int ANALOG = 0; //PC0
 const int STROBE = 0; //PD0
 const int RESET = 1; //PD1
 int outputValues[7];
+
+uint8_t max7219_buffer[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 int main(void)
 {
@@ -113,26 +121,14 @@ int main(void)
 				{
 					max7219_buffer_clr(i, j);	// Clear pixel
 				}
-				//_delay_us(5);
+				delay_us(5);
 			}
 		}
 		
 		
+		
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void delay_ms(uint16_t count) {
 	while(count--) {
@@ -148,10 +144,10 @@ void delay_us(uint16_t count) {
 
 void digitalWritePortD(uint8_t pin, uint8_t val) {
 	if (val != 0) {
-		portD_value = (portD_value) | (1<<pin);
+		portD_value |= (1<<6);
 	}
 	else {
-		portD_value = (portD_value) & (0<<pin);
+		portD_value &= ~(1<<6);
 	}
 	PORTD = portD_value;
 }
@@ -196,7 +192,7 @@ void max7219_row(uint8_t address, uint8_t data) {
 	if (address >= 1 && address <= 8) max7219_word(address, data);
 }
 
-uint8_t max7219_buffer[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
 
 void max7219_buffer_out(void) {
 	// Output the buffer

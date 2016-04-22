@@ -3,31 +3,31 @@ DisplayTest.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000040  00800100  00000228  000002bc  2**0
+  0 .data         00000040  00800100  0000022e  000002c2  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000228  00000000  00000000  00000094  2**1
+  1 .text         0000022e  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000008  00800140  00800140  000002fc  2**0
+  2 .bss          00000008  00800140  00800140  00000302  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000002fc  2**0
+  3 .comment      00000030  00000000  00000000  00000302  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  0000032c  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000334  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000060  00000000  00000000  0000036c  2**0
+  5 .debug_aranges 00000060  00000000  00000000  00000374  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000004ce  00000000  00000000  000003cc  2**0
+  6 .debug_info   000004d0  00000000  00000000  000003d4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000001bb  00000000  00000000  0000089a  2**0
+  7 .debug_abbrev 000001bb  00000000  00000000  000008a4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000200  00000000  00000000  00000a55  2**0
+  8 .debug_line   00000200  00000000  00000000  00000a5f  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000cc  00000000  00000000  00000c58  2**2
+  9 .debug_frame  000000cc  00000000  00000000  00000c60  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000258  00000000  00000000  00000d24  2**0
+ 10 .debug_str    0000024c  00000000  00000000  00000d2c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000003bd  00000000  00000000  00000f7c  2**0
+ 11 .debug_loc    000003bf  00000000  00000000  00000f78  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000068  00000000  00000000  00001339  2**0
+ 12 .debug_ranges 00000068  00000000  00000000  00001337  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -72,7 +72,7 @@ Disassembly of section .text:
   74:	11 e0       	ldi	r17, 0x01	; 1
   76:	a0 e0       	ldi	r26, 0x00	; 0
   78:	b1 e0       	ldi	r27, 0x01	; 1
-  7a:	e8 e2       	ldi	r30, 0x28	; 40
+  7a:	ee e2       	ldi	r30, 0x2E	; 46
   7c:	f2 e0       	ldi	r31, 0x02	; 2
   7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
   80:	05 90       	lpm	r0, Z+
@@ -94,8 +94,8 @@ Disassembly of section .text:
   94:	a8 34       	cpi	r26, 0x48	; 72
   96:	b2 07       	cpc	r27, r18
   98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
-  9a:	0e 94 ca 00 	call	0x194	; 0x194 <main>
-  9e:	0c 94 12 01 	jmp	0x224	; 0x224 <_exit>
+  9a:	0e 94 cd 00 	call	0x19a	; 0x19a <main>
+  9e:	0c 94 15 01 	jmp	0x22a	; 0x22a <_exit>
 
 000000a2 <__bad_interrupt>:
   a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -177,279 +177,282 @@ void max7219_init(void)
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  dc:	83 ed       	ldi	r24, 0xD3	; 211
-  de:	90 e3       	ldi	r25, 0x30	; 48
-  e0:	01 97       	sbiw	r24, 0x01	; 1
-  e2:	f1 f7       	brne	.-4      	; 0xe0 <max7219_init+0xa>
-  e4:	00 c0       	rjmp	.+0      	; 0xe6 <max7219_init+0x10>
-  e6:	00 00       	nop
+  dc:	2f e7       	ldi	r18, 0x7F	; 127
+  de:	88 e3       	ldi	r24, 0x38	; 56
+  e0:	91 e0       	ldi	r25, 0x01	; 1
+  e2:	21 50       	subi	r18, 0x01	; 1
+  e4:	80 40       	sbci	r24, 0x00	; 0
+  e6:	90 40       	sbci	r25, 0x00	; 0
+  e8:	e1 f7       	brne	.-8      	; 0xe2 <max7219_init+0xc>
+  ea:	00 c0       	rjmp	.+0      	; 0xec <max7219_init+0x16>
+  ec:	00 00       	nop
 	_delay_ms(50);	// TODO: Q: Is this necessary?
 	max7219_word(0x09, 0x00);	// Decode: BCD
-  e8:	60 e0       	ldi	r22, 0x00	; 0
-  ea:	89 e0       	ldi	r24, 0x09	; 9
-  ec:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
+  ee:	60 e0       	ldi	r22, 0x00	; 0
+  f0:	89 e0       	ldi	r24, 0x09	; 9
+  f2:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
 	max7219_word(0x0a, 0x03);	// Brightness
-  f0:	63 e0       	ldi	r22, 0x03	; 3
-  f2:	8a e0       	ldi	r24, 0x0A	; 10
-  f4:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
+  f6:	63 e0       	ldi	r22, 0x03	; 3
+  f8:	8a e0       	ldi	r24, 0x0A	; 10
+  fa:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
 	max7219_word(0x0b, 0x07);	//
-  f8:	67 e0       	ldi	r22, 0x07	; 7
-  fa:	8b e0       	ldi	r24, 0x0B	; 11
-  fc:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
+  fe:	67 e0       	ldi	r22, 0x07	; 7
+ 100:	8b e0       	ldi	r24, 0x0B	; 11
+ 102:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
 	max7219_word(0x0c, 0x01);	//
- 100:	61 e0       	ldi	r22, 0x01	; 1
- 102:	8c e0       	ldi	r24, 0x0C	; 12
- 104:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
+ 106:	61 e0       	ldi	r22, 0x01	; 1
+ 108:	8c e0       	ldi	r24, 0x0C	; 12
+ 10a:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
 	max7219_word(0x0f, 0x00);	//
- 108:	60 e0       	ldi	r22, 0x00	; 0
- 10a:	8f e0       	ldi	r24, 0x0F	; 15
- 10c:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
- 110:	08 95       	ret
+ 10e:	60 e0       	ldi	r22, 0x00	; 0
+ 110:	8f e0       	ldi	r24, 0x0F	; 15
+ 112:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
+ 116:	08 95       	ret
 
-00000112 <max7219_row>:
+00000118 <max7219_row>:
 }
 
 void max7219_row(uint8_t address, uint8_t data) {
 	if (address >= 1 && address <= 8) max7219_word(address, data);
- 112:	9f ef       	ldi	r25, 0xFF	; 255
- 114:	98 0f       	add	r25, r24
- 116:	98 30       	cpi	r25, 0x08	; 8
- 118:	10 f4       	brcc	.+4      	; 0x11e <max7219_row+0xc>
- 11a:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
- 11e:	08 95       	ret
+ 118:	9f ef       	ldi	r25, 0xFF	; 255
+ 11a:	98 0f       	add	r25, r24
+ 11c:	98 30       	cpi	r25, 0x08	; 8
+ 11e:	10 f4       	brcc	.+4      	; 0x124 <max7219_row+0xc>
+ 120:	0e 94 60 00 	call	0xc0	; 0xc0 <max7219_word>
+ 124:	08 95       	ret
 
-00000120 <max7219_buffer_out>:
+00000126 <max7219_buffer_out>:
 }
 
 uint8_t max7219_buffer[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 void max7219_buffer_out(void) {
- 120:	0f 93       	push	r16
- 122:	1f 93       	push	r17
- 124:	cf 93       	push	r28
- 126:	00 e4       	ldi	r16, 0x40	; 64
- 128:	11 e0       	ldi	r17, 0x01	; 1
+ 126:	0f 93       	push	r16
+ 128:	1f 93       	push	r17
+ 12a:	cf 93       	push	r28
+ 12c:	00 e4       	ldi	r16, 0x40	; 64
+ 12e:	11 e0       	ldi	r17, 0x01	; 1
 	// Output the buffer
 	for (uint8_t row = 1; row <= 8; row++)
- 12a:	c1 e0       	ldi	r28, 0x01	; 1
+ 130:	c1 e0       	ldi	r28, 0x01	; 1
 	max7219_row(row, max7219_buffer[row - 1]);
- 12c:	f8 01       	movw	r30, r16
- 12e:	61 91       	ld	r22, Z+
- 130:	8f 01       	movw	r16, r30
- 132:	8c 2f       	mov	r24, r28
- 134:	0e 94 89 00 	call	0x112	; 0x112 <max7219_row>
+ 132:	f8 01       	movw	r30, r16
+ 134:	61 91       	ld	r22, Z+
+ 136:	8f 01       	movw	r16, r30
+ 138:	8c 2f       	mov	r24, r28
+ 13a:	0e 94 8c 00 	call	0x118	; 0x118 <max7219_row>
 
 uint8_t max7219_buffer[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 void max7219_buffer_out(void) {
 	// Output the buffer
 	for (uint8_t row = 1; row <= 8; row++)
- 138:	cf 5f       	subi	r28, 0xFF	; 255
- 13a:	c9 30       	cpi	r28, 0x09	; 9
- 13c:	b9 f7       	brne	.-18     	; 0x12c <max7219_buffer_out+0xc>
+ 13e:	cf 5f       	subi	r28, 0xFF	; 255
+ 140:	c9 30       	cpi	r28, 0x09	; 9
+ 142:	b9 f7       	brne	.-18     	; 0x132 <max7219_buffer_out+0xc>
 	max7219_row(row, max7219_buffer[row - 1]);
 }
- 13e:	cf 91       	pop	r28
- 140:	1f 91       	pop	r17
- 142:	0f 91       	pop	r16
- 144:	08 95       	ret
+ 144:	cf 91       	pop	r28
+ 146:	1f 91       	pop	r17
+ 148:	0f 91       	pop	r16
+ 14a:	08 95       	ret
 
-00000146 <max7219_buffer_set>:
+0000014c <max7219_buffer_set>:
 
 void max7219_buffer_set(uint8_t x, uint8_t y) {
 	uint8_t sx = 7 - (x & 0b0111);
 	uint8_t sy = (y & 0b0111);
- 146:	67 70       	andi	r22, 0x07	; 7
+ 14c:	67 70       	andi	r22, 0x07	; 7
 	max7219_buffer[sy] |= (1 << sx);
- 148:	e6 2f       	mov	r30, r22
- 14a:	f0 e0       	ldi	r31, 0x00	; 0
- 14c:	e0 5c       	subi	r30, 0xC0	; 192
- 14e:	fe 4f       	sbci	r31, 0xFE	; 254
+ 14e:	e6 2f       	mov	r30, r22
+ 150:	f0 e0       	ldi	r31, 0x00	; 0
+ 152:	e0 5c       	subi	r30, 0xC0	; 192
+ 154:	fe 4f       	sbci	r31, 0xFE	; 254
 	for (uint8_t row = 1; row <= 8; row++)
 	max7219_row(row, max7219_buffer[row - 1]);
 }
 
 void max7219_buffer_set(uint8_t x, uint8_t y) {
 	uint8_t sx = 7 - (x & 0b0111);
- 150:	80 95       	com	r24
- 152:	28 2f       	mov	r18, r24
- 154:	27 70       	andi	r18, 0x07	; 7
+ 156:	80 95       	com	r24
+ 158:	28 2f       	mov	r18, r24
+ 15a:	27 70       	andi	r18, 0x07	; 7
 	uint8_t sy = (y & 0b0111);
 	max7219_buffer[sy] |= (1 << sx);
- 156:	81 e0       	ldi	r24, 0x01	; 1
- 158:	90 e0       	ldi	r25, 0x00	; 0
- 15a:	02 c0       	rjmp	.+4      	; 0x160 <max7219_buffer_set+0x1a>
- 15c:	88 0f       	add	r24, r24
- 15e:	99 1f       	adc	r25, r25
- 160:	2a 95       	dec	r18
- 162:	e2 f7       	brpl	.-8      	; 0x15c <max7219_buffer_set+0x16>
- 164:	90 81       	ld	r25, Z
- 166:	89 2b       	or	r24, r25
- 168:	80 83       	st	Z, r24
- 16a:	08 95       	ret
+ 15c:	81 e0       	ldi	r24, 0x01	; 1
+ 15e:	90 e0       	ldi	r25, 0x00	; 0
+ 160:	02 c0       	rjmp	.+4      	; 0x166 <max7219_buffer_set+0x1a>
+ 162:	88 0f       	add	r24, r24
+ 164:	99 1f       	adc	r25, r25
+ 166:	2a 95       	dec	r18
+ 168:	e2 f7       	brpl	.-8      	; 0x162 <max7219_buffer_set+0x16>
+ 16a:	90 81       	ld	r25, Z
+ 16c:	89 2b       	or	r24, r25
+ 16e:	80 83       	st	Z, r24
+ 170:	08 95       	ret
 
-0000016c <max7219_buffer_clr>:
+00000172 <max7219_buffer_clr>:
 }
 
 void max7219_buffer_clr(uint8_t x, uint8_t y) {
 	uint8_t sx = 7 - (x & 0b0111);
 	uint8_t sy = (y & 0b0111);
- 16c:	67 70       	andi	r22, 0x07	; 7
+ 172:	67 70       	andi	r22, 0x07	; 7
 	max7219_buffer[sy] &= ~(1 << sx);
- 16e:	e6 2f       	mov	r30, r22
- 170:	f0 e0       	ldi	r31, 0x00	; 0
- 172:	e0 5c       	subi	r30, 0xC0	; 192
- 174:	fe 4f       	sbci	r31, 0xFE	; 254
+ 174:	e6 2f       	mov	r30, r22
+ 176:	f0 e0       	ldi	r31, 0x00	; 0
+ 178:	e0 5c       	subi	r30, 0xC0	; 192
+ 17a:	fe 4f       	sbci	r31, 0xFE	; 254
 	uint8_t sy = (y & 0b0111);
 	max7219_buffer[sy] |= (1 << sx);
 }
 
 void max7219_buffer_clr(uint8_t x, uint8_t y) {
 	uint8_t sx = 7 - (x & 0b0111);
- 176:	80 95       	com	r24
- 178:	28 2f       	mov	r18, r24
- 17a:	27 70       	andi	r18, 0x07	; 7
+ 17c:	80 95       	com	r24
+ 17e:	28 2f       	mov	r18, r24
+ 180:	27 70       	andi	r18, 0x07	; 7
 	uint8_t sy = (y & 0b0111);
 	max7219_buffer[sy] &= ~(1 << sx);
- 17c:	81 e0       	ldi	r24, 0x01	; 1
- 17e:	90 e0       	ldi	r25, 0x00	; 0
- 180:	02 c0       	rjmp	.+4      	; 0x186 <max7219_buffer_clr+0x1a>
- 182:	88 0f       	add	r24, r24
- 184:	99 1f       	adc	r25, r25
- 186:	2a 95       	dec	r18
- 188:	e2 f7       	brpl	.-8      	; 0x182 <max7219_buffer_clr+0x16>
- 18a:	80 95       	com	r24
- 18c:	90 81       	ld	r25, Z
- 18e:	89 23       	and	r24, r25
- 190:	80 83       	st	Z, r24
- 192:	08 95       	ret
+ 182:	81 e0       	ldi	r24, 0x01	; 1
+ 184:	90 e0       	ldi	r25, 0x00	; 0
+ 186:	02 c0       	rjmp	.+4      	; 0x18c <max7219_buffer_clr+0x1a>
+ 188:	88 0f       	add	r24, r24
+ 18a:	99 1f       	adc	r25, r25
+ 18c:	2a 95       	dec	r18
+ 18e:	e2 f7       	brpl	.-8      	; 0x188 <max7219_buffer_clr+0x16>
+ 190:	80 95       	com	r24
+ 192:	90 81       	ld	r25, Z
+ 194:	89 23       	and	r24, r25
+ 196:	80 83       	st	Z, r24
+ 198:	08 95       	ret
 
-00000194 <main>:
+0000019a <main>:
 
 
 
 
 
 int main(void) {
- 194:	cf 93       	push	r28
- 196:	df 93       	push	r29
- 198:	cd b7       	in	r28, 0x3d	; 61
- 19a:	de b7       	in	r29, 0x3e	; 62
- 19c:	c0 54       	subi	r28, 0x40	; 64
- 19e:	d1 09       	sbc	r29, r1
- 1a0:	0f b6       	in	r0, 0x3f	; 63
- 1a2:	f8 94       	cli
- 1a4:	de bf       	out	0x3e, r29	; 62
- 1a6:	0f be       	out	0x3f, r0	; 63
- 1a8:	cd bf       	out	0x3d, r28	; 61
+ 19a:	cf 93       	push	r28
+ 19c:	df 93       	push	r29
+ 19e:	cd b7       	in	r28, 0x3d	; 61
+ 1a0:	de b7       	in	r29, 0x3e	; 62
+ 1a2:	c0 54       	subi	r28, 0x40	; 64
+ 1a4:	d1 09       	sbc	r29, r1
+ 1a6:	0f b6       	in	r0, 0x3f	; 63
+ 1a8:	f8 94       	cli
+ 1aa:	de bf       	out	0x3e, r29	; 62
+ 1ac:	0f be       	out	0x3f, r0	; 63
+ 1ae:	cd bf       	out	0x3d, r28	; 61
 
 	// ---- Initialization ----
 	max7219_init();
- 1aa:	0e 94 6b 00 	call	0xd6	; 0xd6 <max7219_init>
+ 1b0:	0e 94 6b 00 	call	0xd6	; 0xd6 <max7219_init>
 	
 	uint8_t data[8][8] = {
- 1ae:	80 e4       	ldi	r24, 0x40	; 64
- 1b0:	e0 e0       	ldi	r30, 0x00	; 0
- 1b2:	f1 e0       	ldi	r31, 0x01	; 1
- 1b4:	de 01       	movw	r26, r28
- 1b6:	11 96       	adiw	r26, 0x01	; 1
- 1b8:	01 90       	ld	r0, Z+
- 1ba:	0d 92       	st	X+, r0
- 1bc:	8a 95       	dec	r24
- 1be:	e1 f7       	brne	.-8      	; 0x1b8 <main+0x24>
- 1c0:	4e 01       	movw	r8, r28
- 1c2:	81 e4       	ldi	r24, 0x41	; 65
- 1c4:	88 0e       	add	r8, r24
- 1c6:	91 1c       	adc	r9, r1
+ 1b4:	80 e4       	ldi	r24, 0x40	; 64
+ 1b6:	e0 e0       	ldi	r30, 0x00	; 0
+ 1b8:	f1 e0       	ldi	r31, 0x01	; 1
+ 1ba:	de 01       	movw	r26, r28
+ 1bc:	11 96       	adiw	r26, 0x01	; 1
+ 1be:	01 90       	ld	r0, Z+
+ 1c0:	0d 92       	st	X+, r0
+ 1c2:	8a 95       	dec	r24
+ 1c4:	e1 f7       	brne	.-8      	; 0x1be <main+0x24>
+ 1c6:	4e 01       	movw	r8, r28
+ 1c8:	81 e4       	ldi	r24, 0x41	; 65
+ 1ca:	88 0e       	add	r8, r24
+ 1cc:	91 1c       	adc	r9, r1
 	// ---- Main Loop ----
 	while (1) {
 		for (uint8_t i = 0; i <= 7; i++) {
 			for (uint8_t y = 0; y <= 7; y++) {
 				uint8_t d = data[i][y];
 				for (uint8_t x = 0; x <= 7; x++) {
- 1c8:	71 2c       	mov	r7, r1
- 1ca:	e7 2c       	mov	r14, r7
- 1cc:	fe 01       	movw	r30, r28
- 1ce:	31 96       	adiw	r30, 0x01	; 1
- 1d0:	5f 01       	movw	r10, r30
- 1d2:	25 c0       	rjmp	.+74     	; 0x21e <main+0x8a>
+ 1ce:	71 2c       	mov	r7, r1
+ 1d0:	e7 2c       	mov	r14, r7
+ 1d2:	fe 01       	movw	r30, r28
+ 1d4:	31 96       	adiw	r30, 0x01	; 1
+ 1d6:	5f 01       	movw	r10, r30
+ 1d8:	25 c0       	rjmp	.+74     	; 0x224 <main+0x8a>
 
 	// ---- Main Loop ----
 	while (1) {
 		for (uint8_t i = 0; i <= 7; i++) {
 			for (uint8_t y = 0; y <= 7; y++) {
 				uint8_t d = data[i][y];
- 1d4:	f6 01       	movw	r30, r12
- 1d6:	01 91       	ld	r16, Z+
- 1d8:	6f 01       	movw	r12, r30
+ 1da:	f6 01       	movw	r30, r12
+ 1dc:	01 91       	ld	r16, Z+
+ 1de:	6f 01       	movw	r12, r30
 				for (uint8_t x = 0; x <= 7; x++) {
- 1da:	1e 2d       	mov	r17, r14
+ 1e0:	1e 2d       	mov	r17, r14
 					max7219_buffer_out();	// Output the buffer
- 1dc:	0e 94 90 00 	call	0x120	; 0x120 <max7219_buffer_out>
+ 1e2:	0e 94 93 00 	call	0x126	; 0x126 <max7219_buffer_out>
 					if ((d & 1) == 1)
- 1e0:	00 ff       	sbrs	r16, 0
- 1e2:	05 c0       	rjmp	.+10     	; 0x1ee <main+0x5a>
+ 1e6:	00 ff       	sbrs	r16, 0
+ 1e8:	05 c0       	rjmp	.+10     	; 0x1f4 <main+0x5a>
 					max7219_buffer_set(x, y);	// Set pixel
- 1e4:	6f 2d       	mov	r22, r15
- 1e6:	81 2f       	mov	r24, r17
- 1e8:	0e 94 a3 00 	call	0x146	; 0x146 <max7219_buffer_set>
- 1ec:	04 c0       	rjmp	.+8      	; 0x1f6 <main+0x62>
+ 1ea:	6f 2d       	mov	r22, r15
+ 1ec:	81 2f       	mov	r24, r17
+ 1ee:	0e 94 a6 00 	call	0x14c	; 0x14c <max7219_buffer_set>
+ 1f2:	04 c0       	rjmp	.+8      	; 0x1fc <main+0x62>
 					else
 					max7219_buffer_clr(x, y);	// Clear pixel
- 1ee:	6f 2d       	mov	r22, r15
- 1f0:	81 2f       	mov	r24, r17
- 1f2:	0e 94 b6 00 	call	0x16c	; 0x16c <max7219_buffer_clr>
+ 1f4:	6f 2d       	mov	r22, r15
+ 1f6:	81 2f       	mov	r24, r17
+ 1f8:	0e 94 b9 00 	call	0x172	; 0x172 <max7219_buffer_clr>
 					d = d >> 1;
- 1f6:	06 95       	lsr	r16
- 1f8:	87 e8       	ldi	r24, 0x87	; 135
- 1fa:	93 e1       	ldi	r25, 0x13	; 19
- 1fc:	01 97       	sbiw	r24, 0x01	; 1
- 1fe:	f1 f7       	brne	.-4      	; 0x1fc <main+0x68>
- 200:	00 c0       	rjmp	.+0      	; 0x202 <main+0x6e>
- 202:	00 00       	nop
+ 1fc:	06 95       	lsr	r16
+ 1fe:	8f e3       	ldi	r24, 0x3F	; 63
+ 200:	9c e9       	ldi	r25, 0x9C	; 156
+ 202:	01 97       	sbiw	r24, 0x01	; 1
+ 204:	f1 f7       	brne	.-4      	; 0x202 <main+0x68>
+ 206:	00 c0       	rjmp	.+0      	; 0x208 <main+0x6e>
+ 208:	00 00       	nop
 	// ---- Main Loop ----
 	while (1) {
 		for (uint8_t i = 0; i <= 7; i++) {
 			for (uint8_t y = 0; y <= 7; y++) {
 				uint8_t d = data[i][y];
 				for (uint8_t x = 0; x <= 7; x++) {
- 204:	1f 5f       	subi	r17, 0xFF	; 255
- 206:	18 30       	cpi	r17, 0x08	; 8
- 208:	49 f7       	brne	.-46     	; 0x1dc <main+0x48>
+ 20a:	1f 5f       	subi	r17, 0xFF	; 255
+ 20c:	18 30       	cpi	r17, 0x08	; 8
+ 20e:	49 f7       	brne	.-46     	; 0x1e2 <main+0x48>
 	};
 
 	// ---- Main Loop ----
 	while (1) {
 		for (uint8_t i = 0; i <= 7; i++) {
 			for (uint8_t y = 0; y <= 7; y++) {
- 20a:	f3 94       	inc	r15
- 20c:	98 e0       	ldi	r25, 0x08	; 8
- 20e:	f9 12       	cpse	r15, r25
- 210:	e1 cf       	rjmp	.-62     	; 0x1d4 <main+0x40>
- 212:	e8 e0       	ldi	r30, 0x08	; 8
- 214:	ae 0e       	add	r10, r30
- 216:	b1 1c       	adc	r11, r1
+ 210:	f3 94       	inc	r15
+ 212:	98 e0       	ldi	r25, 0x08	; 8
+ 214:	f9 12       	cpse	r15, r25
+ 216:	e1 cf       	rjmp	.-62     	; 0x1da <main+0x40>
+ 218:	e8 e0       	ldi	r30, 0x08	; 8
+ 21a:	ae 0e       	add	r10, r30
+ 21c:	b1 1c       	adc	r11, r1
 		{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, },
 	};
 
 	// ---- Main Loop ----
 	while (1) {
 		for (uint8_t i = 0; i <= 7; i++) {
- 218:	a8 14       	cp	r10, r8
- 21a:	b9 04       	cpc	r11, r9
- 21c:	b9 f2       	breq	.-82     	; 0x1cc <main+0x38>
+ 21e:	a8 14       	cp	r10, r8
+ 220:	b9 04       	cpc	r11, r9
+ 222:	b9 f2       	breq	.-82     	; 0x1d2 <main+0x38>
 
 
 
 
 
 int main(void) {
- 21e:	65 01       	movw	r12, r10
- 220:	f7 2c       	mov	r15, r7
- 222:	d8 cf       	rjmp	.-80     	; 0x1d4 <main+0x40>
+ 224:	65 01       	movw	r12, r10
+ 226:	f7 2c       	mov	r15, r7
+ 228:	d8 cf       	rjmp	.-80     	; 0x1da <main+0x40>
 
-00000224 <_exit>:
- 224:	f8 94       	cli
+0000022a <_exit>:
+ 22a:	f8 94       	cli
 
-00000226 <__stop_program>:
- 226:	ff cf       	rjmp	.-2      	; 0x226 <__stop_program>
+0000022c <__stop_program>:
+ 22c:	ff cf       	rjmp	.-2      	; 0x22c <__stop_program>

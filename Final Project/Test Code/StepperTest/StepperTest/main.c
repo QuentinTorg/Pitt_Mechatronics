@@ -23,16 +23,17 @@ void digitalWritePortB(uint8_t pin, uint8_t val);
 void digitalWritePortC(uint8_t pin, uint8_t val);
 void digitalWritePortD(uint8_t pin, uint8_t val);
 void playFlute(int playSound);
+int noteLookup(char note);
 
 //Global variables
 int sensor_value = 0; // value read from analog sensor (0 - 1023)
 int step_current = 0; //Variables corresponding to the stepper's steps
 int desired_location = 0;
-long delay_between_steps = 5; //set a time to delay between steps
+long delay_between_steps = 10; //set a time to delay between steps
 int loops_per_milli = 1;
 float accel_multiplier = 1.0010;
 
-int max_velocity = 50;
+int max_velocity = 70;
 long start_velocity = 100000000;
 
 uint8_t portB_value = 0b00000000;
@@ -74,18 +75,11 @@ int main(void)
 	ADMUX = 0<<REFS1 | 1<<REFS0 | 1<<ADLAR; //0x60 or 0b01100000 // select Analog Reference voltage to be AVcc (bits 7-6 of ADMUX = 01),
 	//left justification (bit 5 of ADMUX = ADLAR = 1) and select channel 0 (bits 3-0 of ADMUX = MUX3-MUX0 = 000)
 	
-	playFlute(LOW);
+	playFlute(HIGH);  //Starts the flute out as closed
 	
 	while (1)
-	{
+	{		
 		/*
-		//Toggle On/Off Motor
-		playFlute(LOW);
-		delay_ms(500);
-		playFlute(HIGH);
-		delay_ms(500);
-		*/
-		
 		// Read analog input
 		ADCSRA |= (1<<ADSC); // Start conversion
 		while ((ADCSRA & (1<<ADIF)) ==0); // wait for conversion to finish
@@ -93,31 +87,125 @@ int main(void)
 		//ADC Complete
 		
 		desired_location = sensor_value * 50; //The times four comes from we needed more steps per degree from potentiometer
+		*/
 		
-		//Stepper Stuff
-		updateStepper(5000);
+		//delay_ms(3000);
+		//updateStepper(4000);
+		//updateStepper(noteLookup('F'));
 		
+		
+		updateStepper(noteLookup('G'));
+		playFlute(LOW);
+		delay_ms(250);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('A'));
+		playFlute(LOW);
+		delay_ms(250);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('a'));
+		playFlute(LOW);
+		delay_ms(500);
+		playFlute(HIGH);
+		delay_ms(50);
+		
+		updateStepper(noteLookup('a'));
+		playFlute(LOW);
+		delay_ms(500);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('F'));
+		playFlute(LOW);
+		delay_ms(500);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('d'));
+		playFlute(LOW);
+		delay_ms(500);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('w'));
+		playFlute(LOW);
+		delay_ms(500);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('D'));
+		playFlute(LOW);
+		delay_ms(250);
+		playFlute(HIGH);
+		
+		updateStepper(noteLookup('D'));
+		playFlute(LOW);
+		delay_ms(250);
+		playFlute(HIGH);
+		delay_ms(50);
+		
+		updateStepper(noteLookup('D'));
+		playFlute(LOW);
+		delay_ms(500);
+		playFlute(HIGH);
+		
+		delay_ms(3000);
+	}
+	return 0;
+}
+
+int noteLookup(char note) {
+	float length = 0.0; //lengths are in mm
+	float Fstandard = 242.0;
+	int steps = 0; //steps is an integer corresponding to how many steps the stepper moves
+	// MOTOR at 7.5 volts
+	
+	switch (note) {
+		case 'w' : //w = = A# = Bflat but the octave lower
+		length = Fstandard - 29.0;
+		break;
+		case 'd':
+		length = Fstandard - 11.2;
+		break;
+		case 'F' :
+		length = Fstandard;
+		break;
+		case 'G' :
+		length = Fstandard - 48.0;
+		break;
+		case 'A' :
+		length = Fstandard - 35.6;
+		break;
+		case 'a' : //a = A# = Bflat
+		length = Fstandard -29.0;
+		break;
+		case 'B' :
+		length = Fstandard - 24.6;
+		break;
+		case 'D' :
+		length = Fstandard - 11.2;
+		break;
+		
+		default: //if there is an unknown note, the motor does not step
+		return 0;
 	}
 	
-	return(0);
+	return steps = (4000.0 / 111.0) * length;
 }
 
 /*
 int updateStepper(int step_desired)
 {
-	int velocity_sign = 0;
-	int accel_sign = 0;
-	int adder_var = 0;
-	
-	if (step_desired > step_current) {
-		accel_sign = 1;
-		velocity_sign = 1;
-		digitalWritePortD(direction_pin, HIGH);
-		adder_var = 1;
-	}
-	else if (step_desired < step_current) {
-		
-	}
+int velocity_sign = 0;
+int accel_sign = 0;
+int adder_var = 0;
+
+if (step_desired > step_current) {
+accel_sign = 1;
+velocity_sign = 1;
+digitalWritePortD(direction_pin, HIGH);
+adder_var = 1;
+}
+else if (step_desired < step_current) {
+
+}
 }*/
 
 int updateStepper(int step_desired)
@@ -192,11 +280,11 @@ int updateStepper(int step_desired)
 
 void playFlute(int playSound)
 {
-	if (playSound == LOW) { //Tells the motor to go CW
+	if (playSound == HIGH) { //Tells the motor to up and snuff sound
 		digitalWritePortD(mot_Pin_Right, LOW);
 		digitalWritePortD(mot_Pin_Left, HIGH);
 	}
-	else if (playSound == HIGH) {
+	else if (playSound == LOW) {
 		digitalWritePortD(mot_Pin_Left, LOW);
 		digitalWritePortD(mot_Pin_Right, HIGH);
 	}

@@ -7,7 +7,7 @@
 
 // ============================================================================
 
-#define F_CPU 1000000UL
+#define F_CPU 8000000UL
 
 #include <stdlib.h>
 #include <avr/io.h>
@@ -31,7 +31,7 @@
 #define MAX7219_CS		PD6	// CS,	Pin 4 on LED8x8 Board
 #define MAX7219_CLK		PD7	// CLK,	Pin 5 on LED8x8 Board
 
-#include "max7219led8x8.h"
+//#include "max7219led8x8.h"
 
 #ifndef MAX7219_DIN
 #define MAX7219_DIN		PD5	// DI,	Pin 3 on LED8x8 Board
