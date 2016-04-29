@@ -10,16 +10,17 @@
 #define F_CPU 16000000UL  // 16 MHz
 #include <util/delay.h>
 
+#define OFF 2
 #define HIGH 1
 #define LOW  0
 
 //Function Definitions
-int updateStepper(int stepDesired);
-void delay_ms(uint16_t count);
-void delay_us(uint16_t count);
-void playFlute(int playSound);
-int noteLookup(char note);
-void driveShark(int sharkDirection);
+void updateStepper(long stepDesired);
+void delay_ms(long count);
+void delay_us(long count);
+void playFlute(long playSound);
+long noteLookup(char note);
+void driveShark(long sharkDirection);
 
 // pin assignment cheater functions
 void digitalWritePortB(uint8_t pin, uint8_t val);
@@ -29,19 +30,17 @@ void digitalWritePortD(uint8_t pin, uint8_t val);
 
 
 //Global variables
-int sensor_value = 0; // value read from analog sensor (0 - 1023)
-int step_current = 0; //Variables corresponding to the stepper's steps
-int desired_location = 0;
+long sensor_value = 0; // value read from analog sensor (0 - 1023)
+long step_current = 0; //Variables corresponding to the stepper's steps
+long desired_location = 0;
 long delay_between_steps = 10; //set a time to delay between steps
-int loops_per_milli = 1;
-float accel_multiplier = 1.0010;
+long loops_per_milli = 1;
+float accel_multiplier = 1.17;
 
 //Global variables for updateStepper snippets
-int min_delay = 50;
-long start_delay = 100000000;
 
-int max_velocity = 70;
-long start_velocity = 100000000;
+long max_velocity = 50;
+long start_velocity = 5000;
 
 uint8_t portB_value = 0b00000000;
 uint8_t portC_value = 0b00000000;
@@ -53,19 +52,20 @@ uint8_t mot_Pin_Left = 6;
 uint8_t mot_Pin_Right = 7;
 uint8_t sharkMot_Pin_Left = 4;
 uint8_t sharkMot_Pin_Right = 5;
+uint8_t communication_signal_pin = 1;
 
 /* Our Stepper Motor Pins
 PD2 = step
 PD3 = direction
 
 Stepper Motor Specs
-int steps_per_rev = 200;
+long steps_per_rev = 200;
 float max_vel = 60; // speed in steps/sec
 float max_accel = 350; // speed in steps/sec/sec*/
 
-int main(void)
+long main(void)
 {
-	DDRD =	0b11111100; // Sets pins of Port D according to circuit
+	DDRD =	0b11111110; // Sets pins of Port D according to circuit
 	//Stepper Pins: sets PD2 = step pin and PD3 = direction pins
 	//Shark Motor Pins: sets PD4 = left pin and PD5 = right pin for the H bridge
 	//Motor Pins: sets PD6 = left pin and PD7 = right pin for the H bridge
@@ -85,11 +85,9 @@ int main(void)
 	ADMUX = 0<<REFS1 | 1<<REFS0 | 1<<ADLAR; //0x60 or 0b01100000 // select Analog Reference voltage to be AVcc (bits 7-6 of ADMUX = 01),
 	//left justification (bit 5 of ADMUX = ADLAR = 1) and select channel 0 (bits 3-0 of ADMUX = MUX3-MUX0 = 000)
 	
-	playFlute(HIGH);  //Starts the flute out as closed
-	
-	
 	while (1)
 	{
+		playFlute(HIGH);  //Starts the flute out as closed
 		/*
 		// Read analog input
 		ADCSRA |= (1<<ADSC); // Start conversion
@@ -100,72 +98,107 @@ int main(void)
 		desired_location = sensor_value * 50; //The times four comes from we needed more steps per degree from potentiometer
 		*/
 
-		updateStepper(4000);
-		driveShark(HIGH);
-		delay_ms(3000);
-		driveShark(2);
+		while (PINB & (1<<PB0) == 1);
 		
-		/*
+		
+		delay_ms(2000);
+
+		
+		driveShark(HIGH);
+		
+
 		updateStepper(noteLookup('G'));
 		playFlute(LOW);
-		delay_ms(250);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(150);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
+
 		
 		updateStepper(noteLookup('A'));
 		playFlute(LOW);
-		delay_ms(250);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(150);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
+
 		
 		updateStepper(noteLookup('a'));
 		playFlute(LOW);
-		delay_ms(500);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(400);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
 		delay_ms(50);
 		
-		updateStepper(noteLookup('a'));
+		
+		//updateStepper(noteLookup('a'));
 		playFlute(LOW);
-		delay_ms(500);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(350);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
+
 		
 		updateStepper(noteLookup('F'));
 		playFlute(LOW);
-		delay_ms(500);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(200);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
+
 		
 		updateStepper(noteLookup('d'));
 		playFlute(LOW);
-		delay_ms(500);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(300);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
+
 		
 		updateStepper(noteLookup('w'));
 		playFlute(LOW);
-		delay_ms(500);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(270);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
+
 		
 		updateStepper(noteLookup('D'));
 		playFlute(LOW);
-		delay_ms(250);
-		playFlute(HIGH);
-		
-		updateStepper(noteLookup('D'));
-		playFlute(LOW);
-		delay_ms(250);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(225);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
 		delay_ms(50);
 		
-		updateStepper(noteLookup('D'));
+		//updateStepper(noteLookup('D'));
 		playFlute(LOW);
+		digitalWritePortD(communication_signal_pin,HIGH);
+		delay_ms(225);
+		digitalWritePortD(communication_signal_pin,LOW);
+		playFlute(HIGH);
+		delay_ms(50);
+		
+		//updateStepper(noteLookup('D'));
+		playFlute(LOW);
+		digitalWritePortD(communication_signal_pin,HIGH);
 		delay_ms(500);
+		digitalWritePortD(communication_signal_pin,LOW);
 		playFlute(HIGH);
 		
-		delay_ms(3000);
-		*/
+		
+		driveShark(OFF);
+		delay_ms(500);
+		updateStepper(0);
+
+		
 	}
 	return 0;
 }
 
-void driveShark(int sharkDirection) {
-	if (sharkDirection == HIGH) { 
+void driveShark(long sharkDirection) {
+	if (sharkDirection == HIGH) {
 		digitalWritePortD(sharkMot_Pin_Right, LOW);
 		digitalWritePortD(sharkMot_Pin_Left, HIGH);
 	}
@@ -173,181 +206,177 @@ void driveShark(int sharkDirection) {
 		digitalWritePortD(sharkMot_Pin_Left, LOW);
 		digitalWritePortD(sharkMot_Pin_Right, HIGH);
 	}
-	else if (sharkDirection == 2) { //Turns the Shark off
+	else if (sharkDirection == OFF) { //Turns the Shark off
 		digitalWritePortD(sharkMot_Pin_Left, LOW);
 		digitalWritePortD(sharkMot_Pin_Right, LOW);
 	}
 }
 
-int noteLookup(char note) {
+long noteLookup(char note) {
 	float length = 0.0; //lengths are in mm
-	float Fstandard = 242.0;
-	int steps = 0; //steps is an integer corresponding to how many steps the stepper moves
+	long steps = 0; //steps is an integer corresponding to how many steps the stepper moves
 	// MOTOR at 7.5 volts
 	
 	switch (note) {
 		case 'w' : //w = = A# = Bflat but the octave lower
-		length = Fstandard - 29.0;
+		length = 32,37;
 		break;
 		case 'd':
-		length = Fstandard - 11.2;
+		length = 50.02;
 		break;
 		case 'F' :
-		length = Fstandard;
+		length = 0;
 		break;
 		case 'G' :
-		length = Fstandard - 48.0;
+		length = 14.5;
 		break;
 		case 'A' :
-		length = Fstandard - 35.6;
+		length = 26.84;
 		break;
 		case 'a' : //a = A# = Bflat
-		length = Fstandard -29.0;
+		length = 32.37;
 		break;
 		case 'B' :
-		length = Fstandard - 24.6;
+		length = 37.12;
 		break;
 		case 'D' :
-		length = Fstandard - 11.2;
+		length = 50.02;
 		break;
 		
 		default: //if there is an unknown note, the motor does not step
 		return 0;
 	}
 	
-	return steps = (4000.0 / 103.6) * length;
+	return steps = (4000.0 / 112.75) * length;
 }
 
-int updateStepper(int step_desired)
+void updateStepper(long step_desired)
 {
-//initializes some variables to zero
-int step_start = step_current;
-int accel_distance = 0;
-int accel_sign = 0; //initially the acceleration is neither forward nor backward
-int distance_from_start = 0;
-int velocity_sign = 0;
-int current_velocity = start_velocity;
-int steps_to_max_velocity = 0;
+	//initializes some variables to zero
+	long step_start = step_current;
+	long accel_distance = 0;
+	long accel_sign = 0; //initially the acceleration is neither forward nor backward
+	long distance_from_start = 0;
+	long velocity_sign = 0;
+	long current_velocity = start_velocity;
+	long steps_to_max_velocity = 0;
+	long adder_var = 0;
+	long flipped_accel_flag = 1;
 
-//Gives velocity and acceleration signs
-if (step_desired > step_current) {
-accel_sign = 1;
-velocity_sign = 1;
-}
-else if (step_desired < step_current) {
-accel_sign = -1;
-velocity_sign = -1;
-}
-else { //if your current step = the desired step
-return step_current;
-}
+	playFlute(HIGH);
 
-int adder_var = 0;
-if (step_desired > step_current)
-{
-digitalWritePortD(direction_pin, HIGH);
-adder_var = 1;
-}
-else if (step_desired < step_current)
-{
-digitalWritePortD(direction_pin, LOW);
-adder_var = -1;
-}
-
-while (step_current != step_desired)
-{
-if (adder_var != 0) //If the motor is not at the desired step, write step pin high then low for a single pulse
-{
-digitalWritePortD(step_pin, HIGH);
-digitalWritePortD(step_pin, LOW);
-}
-
-// increment current position
-step_current += adder_var;
-delay_us(current_velocity);
-
-if (velocity_sign == accel_sign) {
-current_velocity = current_velocity / accel_multiplier;
-}
-else {
-current_velocity = current_velocity * accel_multiplier;
-}
-
-if (current_velocity < max_velocity) {
-current_velocity = max_velocity;
-}
-
-if ((current_velocity != max_velocity) && (accel_sign == velocity_sign) && (steps_to_max_velocity < abs(step_current - step_desired))) {
-steps_to_max_velocity++;
-}
-else if (steps_to_max_velocity > abs(step_current - step_desired)){
-accel_sign = -accel_sign;
-}
-
-}
-return step_current;
-}
-
-/* Improved update Stepper Code Snippets
-int updateStepper(int step_desired)
-{
-	int current_delay = start_delay;
-	int delay_sign = 0;
-	int accel_sign = 0;
-	int adder_var = 0;
-	int steps_to_max_velocity = 0;
-	
+	//Gives velocity and acceleration signs
 	if (step_desired > step_current) {
 		accel_sign = 1;
-		delay_sign = 1;
+		velocity_sign = 1;
 		digitalWritePortD(direction_pin, HIGH);
 		adder_var = 1;
 	}
 	else if (step_desired < step_current) {
 		accel_sign = -1;
-		delay_sign = -1;
+		velocity_sign = -1;
 		digitalWritePortD(direction_pin, LOW);
 		adder_var = -1;
 	}
-	else {
-		return step_current;
+	else { //if your current step = the desired step
+		return;
 	}
 
-	while (step_current != step_desired) {
-		
-		// send pulse
-		digitalWritePortD(step_pin, HIGH);
-		digitalWritePortD(step_pin, LOW);
-		
+	while (step_current != step_desired)
+	{
+		if (adder_var != 0) //If the motor is not at the desired step, write step pin high then low for a single pulse
+		{
+			digitalWritePortD(step_pin, HIGH);
+			digitalWritePortD(step_pin, LOW);
+		}
+
 		// increment current position
 		step_current += adder_var;
-		delay_us(current_delay);
-		
-		if (delay_sign == accel_sign) {
-			current_delay = current_delay / accel_multiplier; // Accelerate
+		delay_us(current_velocity);
+
+		if (velocity_sign == accel_sign) {
+			current_velocity = current_velocity / accel_multiplier;
 		}
 		else {
-			current_delay = current_delay * accel_multiplier; // Slow down
-		}
-		
-		if (current_delay < min_delay) {
-			current_delay = min_delay;
+			current_velocity = current_velocity * accel_multiplier;
 		}
 
-		// determine when to start slowing down
-		if ((current_delay != max_delay) && (accel_sign == velocity_sign) && (steps_to_max_velocity < abs(step_current - step_desired))) {
+		if (current_velocity < max_velocity) {
+			current_velocity = max_velocity;
+		}
+
+		if ((current_velocity != max_velocity) && (accel_sign == velocity_sign) && (steps_to_max_velocity < abs(step_current - step_desired))) {
 			steps_to_max_velocity++;
 		}
-		else if (steps_to_max_velocity > abs(step_current - step_desired)){
+		else if ((steps_to_max_velocity > abs(step_current - step_desired)) & (flipped_accel_flag != 0)){
 			accel_sign = -accel_sign;
+			flipped_accel_flag = 0;
 		}
-	}
 
-	return step_current;
+	}
+	return;
+}
+
+/* Improved update Stepper Code Snippets
+long updateStepper(long step_desired)
+{
+long current_delay = start_delay;
+long delay_sign = 0;
+long accel_sign = 0;
+long adder_var = 0;
+long steps_to_max_velocity = 0;
+
+if (step_desired > step_current) {
+accel_sign = 1;
+delay_sign = 1;
+digitalWritePortD(direction_pin, HIGH);
+adder_var = 1;
+}
+else if (step_desired < step_current) {
+accel_sign = -1;
+delay_sign = -1;
+digitalWritePortD(direction_pin, LOW);
+adder_var = -1;
+}
+else {
+return step_current;
+}
+
+while (step_current != step_desired) {
+
+// send pulse
+digitalWritePortD(step_pin, HIGH);
+digitalWritePortD(step_pin, LOW);
+
+// increment current position
+step_current += adder_var;
+delay_us(current_delay);
+
+if (delay_sign == accel_sign) {
+current_delay = current_delay / accel_multiplier; // Accelerate
+}
+else {
+current_delay = current_delay * accel_multiplier; // Slow down
+}
+
+if (current_delay < min_delay) {
+current_delay = min_delay;
+}
+
+// determine when to start slowing down
+if ((current_delay != max_delay) && (accel_sign == velocity_sign) && (steps_to_max_velocity < abs(step_current - step_desired))) {
+steps_to_max_velocity++;
+}
+else if (steps_to_max_velocity > abs(step_current - step_desired)){
+accel_sign = -accel_sign;
+}
+}
+
+return step_current;
 }
 */
 
-void playFlute(int playSound)
+void playFlute(long playSound)
 {
 	if (playSound == HIGH) { //Tells the motor to up and snuff sound
 		digitalWritePortD(mot_Pin_Right, LOW);
@@ -390,13 +419,13 @@ void digitalWritePortD(uint8_t pin, uint8_t val) {
 	PORTD = portD_value;
 }
 
-void delay_ms(uint16_t count) {
+void delay_ms(long count) {
 	while(count--) {
 		_delay_ms(1);
 	}
 }
 
-void delay_us(uint16_t count) {
+void delay_us(long count) {
 	while(count--) {
 		_delay_us(1);
 	}
