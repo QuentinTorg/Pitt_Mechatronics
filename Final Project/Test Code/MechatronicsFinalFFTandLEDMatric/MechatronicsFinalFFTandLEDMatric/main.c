@@ -85,7 +85,7 @@ int main(void)
 		for (int i = 0; i < 7; i++)
 		{
 			digitalWritePortD(STROBE, LOW);
-			delay_us(50); //A time delay of 30 micro seconds
+			delay_us(50); //A time delay of 50 micro seconds
 			
 			// Read analog input: begin ADC
 			ADCSRA |= (1<<ADSC); // Start conversion

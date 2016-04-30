@@ -219,7 +219,7 @@ long noteLookup(char note) {
 	
 	switch (note) {
 		case 'w' : //w = = A# = Bflat but the octave lower
-		length = 32,37;
+		length = 32.37;
 		break;
 		case 'd':
 		length = 50.02;
